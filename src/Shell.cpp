@@ -1,7 +1,5 @@
 #include <print>
-#include <array>
 #include <utility>
-#include <optional>
 
 #include "Shell.h"
 
@@ -36,6 +34,23 @@
 		if (*position == '\\' && !isEscaped) 
 		{
 			isEscaped = true;
+			continue;
+		}
+
+		if (*position == '$' && !isEscaped && delim != '\'') 
+		{
+			auto start = ++position;
+
+			while (position != input.end() && (std::isalnum(*position) || *position == '_'))
+				position++;
+
+			for (
+				char* value = getenv(std::string(start, position).c_str());
+				*value;
+				value++
+			) part.push_back(*value);
+
+			position--;
 			continue;
 		}
 
@@ -78,7 +93,7 @@ int Shell::Run(const std::string& name, const ProgramArguments& args) const
 		return program->Run(args);
 	else 
 	{
-		std::println(stderr, "Unknown program '{}'.", name);
+		std::println(stderr, "Shell::Run - Unknown program '{}'.", name);
 		return -1;
 	}
 }
