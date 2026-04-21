@@ -1,88 +1,13 @@
 #include <print>
-#include <utility>
+#include <algorithm>
 
 #include "Shell.h"
 
-/*static*/ std::vector<std::string> Shell::Parse(const std::string& input) 
-{
-	std::vector<std::string> parts;
-	std::vector<char> part(input.length());
-
-	bool isEscaped = false;
-	char delim = 0;
-
-	for (
-		auto position = std::find_if(input.begin(), input.end(), [](char x) { return !std::isspace(x); });
-		position != input.end();
-		position++
-	)
-	{
-		if (!isEscaped && !delim && *position != delim && (*position == '\"' || *position == '\'')) 
-		{
-			delim = *position;
-			continue;
-		}
-
-		if (((delim && *position == delim) || (!delim && *position == ' ' && !part.empty())) && !isEscaped) 
-		{
-			parts.emplace_back(part.begin(), part.end());
-			part.clear();
-			delim = 0;
-			continue;
-		}
-
-		if (*position == '\\' && !isEscaped) 
-		{
-			isEscaped = true;
-			continue;
-		}
-
-		if (*position == '$' && !isEscaped && delim != '\'') 
-		{
-			auto start = ++position;
-
-			while (position != input.end() && (std::isalnum(*position) || *position == '_'))
-				position++;
-
-			for (
-				char* value = getenv(std::string(start, position).c_str());
-				*value;
-				value++
-			) part.push_back(*value);
-
-			position--;
-			continue;
-		}
-
-		if (isEscaped) 
-		{
-			switch (*position) 
-			{
-				case 'n': part.push_back('\n'); break;
-				case 'r': part.push_back('\r'); break;
-				case 't': part.push_back('\t'); break;
-				default: part.push_back(*position); break;
-			}
-
-			isEscaped = false;
-			continue;
-		}
-
-		if (delim || (!delim && *position != ' '))
-			part.push_back(*position);
-	}
-
-	if (!delim && !part.empty())
-		parts.emplace_back(part.begin(), part.end());
-
-	return parts;
-}
-
 int Shell::Run(const std::string& command) const 
 {
-	auto parts = Parse(command);
+	auto values = Parser::Parse(command);
 
-	return Run(parts[0], ProgramArguments(parts.begin() + 1, parts.end()));
+	return Run(values[0], ProgramArguments(values.begin() + 1, values.end()));
 }
 
 int Shell::Run(const std::string& name, const ProgramArguments& args) const 
