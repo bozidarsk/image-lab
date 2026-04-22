@@ -28,7 +28,16 @@
 		if (!value) value = "";
 
 		tokens.erase(start, stop);
-		std::transform(value, value + strlen(value), std::inserter(tokens, start), [&start](char x) { return Token(x, start->flags); });
+		std::transform(value, value + strlen(value), std::inserter(tokens, start), [&start](char x) 
+			{
+				auto flags = start->flags;
+
+				if (x == ' ' || x == '$' || x == '{' || x == '}' || x == '\'' || x == '\"' || x == '(' || x == ')' || x == '\\')
+					flags |= Token::Flags::Escaped;
+
+				return Token(x, flags);
+			}
+		);
 	}
 }
 
