@@ -27,28 +27,11 @@
 		const char* value = getenv(name.c_str());
 		if (!value) value = "";
 
+		const Token::Flags tokenFlags = start->flags;
+
 		tokens.erase(start, stop);
-		std::transform(value, value + strlen(value), std::inserter(tokens, start), [&start](char x) 
-			{
-				auto flags = start->flags;
-
-				if (x == ' ' || x == '$' || x == '{' || x == '}' || x == '\'' || x == '\"' || x == '(' || x == ')' || x == '\\')
-					flags |= Token::Flags::Escaped;
-
-				return Token(x, flags);
-			}
-		);
+		std::transform(value, value + strlen(value), std::inserter(tokens, start), [&tokenFlags](char x) { return Token(x, tokenFlags | Token::Flags::Escaped); });
 	}
-}
-
-/*static*/ void Shell::Parser::ProcessBraceExpansions(std::vector<Token>& tokens) 
-{
-	// TODO
-}
-
-/*static*/ void Shell::Parser::ProcessWildcards(std::vector<Token>& tokens) 
-{
-	// TODO
 }
 
 /*static*/ std::vector<Shell::Parser::Token> Shell::Parser::Tokenize(const std::string& input) 
@@ -132,8 +115,6 @@
 	std::vector<Token> tokens = Tokenize(command);
 
 	ProcessEnvironmentVariables(tokens);
-	ProcessBraceExpansions(tokens);
-	ProcessWildcards(tokens);
 
 	std::vector<std::string> chunks;
 	std::vector<char> chunk;
