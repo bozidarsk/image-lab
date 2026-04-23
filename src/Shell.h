@@ -71,8 +71,6 @@ public:
 
 		static std::vector<Token> Tokenize(const std::string& input);
 		static void ProcessEnvironmentVariables(std::vector<Token>& tokens);
-		static void ProcessBraceExpansions(std::vector<Token>& tokens);
-		static void ProcessWildcards(std::vector<Token>& tokens);
 
 	public:
 		static std::vector<std::string> Parse(const std::string& command);
