@@ -5,18 +5,43 @@
 
 /*static*/ void Shell::Parser::ProcessEnvironmentVariables(std::vector<Token>& tokens) 
 {
-	// TODO: figure out if it is '"$VAR"' or "'$VAR'" - currently both are ignored, but the second one must be expanded
+	auto findStart = [](std::vector<Shell::Parser::Token>::iterator begin, std::vector<Shell::Parser::Token>::iterator end, bool* canBeExpanded) 
+	{
+		auto dollar = std::find_if(begin, end, [](const Token& x) { return x.value == '$' && !(x.flags & Token::Flags::Escaped); });
 
-	auto startFindCondition = [](const Token& x) { return x.value == '$' && !(x.flags & (Token::Flags::Escaped | Token::Flags::SingleQuoted)); };
-	auto stopFindCondition = [](const Token& x) { return !std::isalnum(x.value) && x.value != '_'; };
+		if (dollar == end) 
+		{
+			*canBeExpanded = false;
+			return end;
+		}
+
+		if (!(dollar->flags & Token::Flags::SingleQuoted)) 
+		{
+			*canBeExpanded = true;
+			return dollar;
+		}
+
+		auto position = dollar;
+
+		while (position != begin && (dollar->flags & Token::Flags::Quoted) == (position->flags & Token::Flags::Quoted))
+			position--;
+
+		*canBeExpanded = !(bool)(position->flags & Token::Flags::SingleQuoted);
+		return dollar;
+	};
+
+	bool canBeExpanded;
 
 	for (
-		auto start = std::find_if(tokens.begin(), tokens.end(), startFindCondition);
+		auto start = findStart(tokens.begin(), tokens.end(), &canBeExpanded);
 		start != tokens.end();
-		start = std::find_if(start + 1, tokens.end(), startFindCondition)
+		start = findStart(start + 1, tokens.end(), &canBeExpanded)
 	)
 	{
-		auto stop = std::find_if(start + 1, tokens.end(), stopFindCondition);
+		if (!canBeExpanded)
+			continue;
+
+		auto stop = std::find_if(start + 1, tokens.end(), [](const Token& x) { return !std::isalnum(x.value) && x.value != '_'; });
 
 		std::string name;
 		std::transform(start + 1, stop, std::back_inserter(name), [](const Token& x) { return x.value; });
