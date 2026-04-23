@@ -7,7 +7,7 @@
 {
 	auto findStart = [](std::vector<Shell::Parser::Token>::iterator begin, std::vector<Shell::Parser::Token>::iterator end, bool* canBeExpanded) 
 	{
-		auto dollar = std::find_if(begin, end, [](const Token& x) { return x.value == '$' && !(x.flags & Token::Flags::Escaped); });
+		auto dollar = std::find_if(begin, end, [](const Token& x) { return x.value == '$' && (x.flags & Token::Flags::Escaped) == 0; });
 
 		if (dollar == end) 
 		{
@@ -15,7 +15,7 @@
 			return end;
 		}
 
-		if (!(dollar->flags & Token::Flags::SingleQuoted)) 
+		if ((dollar->flags & Token::Flags::SingleQuoted) == 0) 
 		{
 			*canBeExpanded = true;
 			return dollar;
@@ -26,7 +26,7 @@
 		while (position != begin && (dollar->flags & Token::Flags::Quoted) == (position->flags & Token::Flags::Quoted))
 			position--;
 
-		*canBeExpanded = !(bool)(position->flags & Token::Flags::SingleQuoted);
+		*canBeExpanded = (position->flags & Token::Flags::SingleQuoted) == 0;
 		return dollar;
 	};
 
@@ -70,13 +70,13 @@
 		position++
 	)
 	{
-		if (*position == '\\' && !(flags & Token::Flags::Escaped)) 
+		if (*position == '\\' && (flags & Token::Flags::Escaped) == 0) 
 		{
 			flags |= Token::Flags::Escaped;
 			continue;
 		}
 
-		if (flags & Token::Flags::Escaped) 
+		if ((flags & Token::Flags::Escaped) != 0) 
 		{
 			switch (*position) 
 			{
@@ -93,7 +93,7 @@
 		switch (*position) 
 		{
 			case '\"':
-				if (!(flags & Token::Flags::DoubleQuoted)) 
+				if ((flags & Token::Flags::DoubleQuoted) == 0) 
 				{
 					tokens.emplace_back(*position, flags);
 					flags |= Token::Flags::DoubleQuoted;
@@ -105,7 +105,7 @@
 				}
 				continue;
 			case '\'':
-				if (!(flags & Token::Flags::SingleQuoted)) 
+				if ((flags & Token::Flags::SingleQuoted) == 0) 
 				{
 					tokens.emplace_back(*position, flags);
 					flags |= Token::Flags::SingleQuoted;
@@ -149,14 +149,14 @@
 	{
 		if (position->value == '\"' || position->value == '\'') 
 		{
-			if (!(position->flags & Token::Flags::Escaped) && !(position->flags & Token::Flags::Quoted)) 
+			if ((position->flags & Token::Flags::Escaped) == 0 && (position->flags & Token::Flags::Quoted) == 0) 
 			{
 				const char quote = position->value;
 				position++;
 
 				std::transform(
 					position,
-					std::find_if(position, tokens.end(), [&quote](const Token& x) { return x.value == quote && !(x.flags & Token::Flags::Escaped); }),
+					std::find_if(position, tokens.end(), [&quote](const Token& x) { return x.value == quote && (x.flags & Token::Flags::Escaped) == 0; }),
 					std::back_inserter(chunk),
 					[&position](const Token& x) { position++; return x.value; }
 				);
@@ -165,7 +165,7 @@
 			}
 		}
 
-		if (position->value == ' ' && !(position->flags & Token::Flags::Escaped)) 
+		if (position->value == ' ' && (position->flags & Token::Flags::Escaped) == 0) 
 		{
 			chunks.emplace_back(chunk.begin(), chunk.end());
 			chunk.clear();

@@ -6,6 +6,7 @@
 #include <cstdint>
 
 #include "Program.h"
+#include "EnumFlags.hpp"
 
 class Shell 
 {
@@ -25,42 +26,15 @@ public:
 	private:
 		struct Token 
 		{
-			struct Flags 
+			enum class Flags : uint8_t
 			{
-			private:
-				using UnderlyingType = uint8_t;
-
-				UnderlyingType value;
-
-			public:
-				enum : UnderlyingType
-				{
-					None         = 0,
-					Escaped      = 1 << 0,
-					SingleQuoted = 1 << 1,
-					DoubleQuoted = 1 << 2,
-					CurlyBraced  = 1 << 3,
-					Quoted = SingleQuoted | DoubleQuoted,
-					Surounded = Quoted | CurlyBraced,
-				};
-
-				inline bool HasFlags(const Flags x) const { return (value & x.value) == x.value; }
-
-				constexpr Flags operator ~ () const { return ~value; }
-				constexpr Flags operator ! () const { return !value; }
-				constexpr Flags operator & (const Flags x) const { return value & x.value; }
-				constexpr Flags operator | (const Flags x) const { return value | x.value; }
-				constexpr Flags operator ^ (const Flags x) const { return value ^ x.value; }
-				constexpr Flags& operator &= (const Flags x) { value &= x.value; return *this; }
-				constexpr Flags& operator |= (const Flags x) { value |= x.value; return *this; }
-				constexpr Flags& operator ^= (const Flags x) { value ^= x.value; return *this; }
-				constexpr bool operator == (const Flags x) const { return value == x.value; }
-				constexpr bool operator != (const Flags x) const { return value != x.value; }
-
-				constexpr explicit operator bool () const { return value != 0; }
-				constexpr explicit operator UnderlyingType () const { return value; }
-
-				constexpr Flags(UnderlyingType value) : value(value) {}
+				None         = 0,
+				Escaped      = 1 << 0,
+				SingleQuoted = 1 << 1,
+				DoubleQuoted = 1 << 2,
+				CurlyBraced  = 1 << 3,
+				Quoted = SingleQuoted | DoubleQuoted,
+				Surounded = Quoted | CurlyBraced,
 			};
 
 			char value;
