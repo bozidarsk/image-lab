@@ -5,8 +5,10 @@
 #include <vector>
 #include <initializer_list>
 #include <cstdint>
+#include <cassert>
 
 #include "Color.h"
+#include "Material.h"
 
 class Image 
 {
@@ -26,6 +28,9 @@ public:
 
 	Color& operator [] (int x, int y);
 	const Color& operator [] (int x, int y) const;
+
+	void ApplyMaterial(const Material& material);
+	void ApplyMaterial(const Material& material, Image& destination) const;
 
 	Image(unsigned int width, unsigned int height);
 	Image(unsigned int width, unsigned int height, const std::vector<Color>& pixels);
