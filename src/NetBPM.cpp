@@ -101,7 +101,7 @@
 	return NetBPM(width, height, pixels);
 }
 
-/*static*/ void NetBPM::Save(const std::string& path, const NetBPM& image) 
+/*static*/ void NetBPM::Save(const std::string& path, const Image& image) 
 {
 	std::ofstream file(path);
 

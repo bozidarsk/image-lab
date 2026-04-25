@@ -43,7 +43,7 @@ private:
 
 public:
 	static std::expected<NetBPM, std::string> Load(const std::string& path);
-	static void Save(const std::string& path, const NetBPM& image);
+	static void Save(const std::string& path, const Image& image);
 
 	NetBPM(unsigned int width, unsigned int height);
 	NetBPM(unsigned int width, unsigned int height, const std::vector<Color>& pixels);
