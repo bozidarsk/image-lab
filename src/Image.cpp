@@ -38,6 +38,31 @@ const Color& Image::operator [] (int x, int y) const
 	return pixels[y * width + x];
 }
 
+void Image::ApplyMaterial(const Material& material) 
+{
+	auto& shader = material.GetShader();
+	auto& uniforms = material.GetUniforms();
+	auto shaderEntryPoint = shader.GetEntryPoint();
+
+	for (int y = 0; y < height; y++)
+		for (int x = 0; x < width; x++)
+			pixels[y * width + x] = shaderEntryPoint(x, y, *this, uniforms);
+}
+
+void Image::ApplyMaterial(const Material& material, Image& destination) const 
+{
+	auto& shader = material.GetShader();
+	auto& uniforms = material.GetUniforms();
+	auto shaderEntryPoint = shader.GetEntryPoint();
+
+	assert(width == destination.width);
+	assert(height == destination.height);
+
+	for (int y = 0; y < height; y++)
+		for (int x = 0; x < width; x++)
+			destination.pixels[y * width + x] = shaderEntryPoint(x, y, *this, uniforms);
+}
+
 Image::Image(unsigned int width, unsigned int height) : width(width), height(height) { pixels.resize(width * height); }
 Image::Image(unsigned int width, unsigned int height, const std::vector<Color>& pixels) : width(width), height(height), pixels(pixels) {}
 Image::Image(unsigned int width, unsigned int height, std::vector<Color>&& pixels) : width(width), height(height), pixels(std::move(pixels)) {}
