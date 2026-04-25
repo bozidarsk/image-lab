@@ -15,6 +15,18 @@ private:
 	Uniforms uniforms;
 
 public:
+	static const Material Inverse;
+	static const Material Grayscale;
+	static const Material ContrastStretch;
+	static const Material Blur;
+	static const Material Sharpen;
+	static const Material Emboss;
+	static const Material Outline;
+	static const Material TopSobel;
+	static const Material BottomSobel;
+	static const Material LeftSobel;
+	static const Material RightSobel;
+
 	const Shader& GetShader() const;
 	const Uniforms& GetUniforms() const;
 
