@@ -63,6 +63,20 @@ void Image::ApplyMaterial(const Material& material, Image& destination) const
 			destination.pixels[y * width + x] = shaderEntryPoint(x, y, *this, uniforms);
 }
 
+/*static*/ Image Image::ApplyMaterials(const Image& image, std::initializer_list<const Material> materials) 
+{
+	Image source(0, 0);
+	Image destination = image;
+
+	for (const Material& material : materials) 
+	{
+		source = destination;
+		source.ApplyMaterial(material, destination);
+	}
+
+	return destination;
+}
+
 Image::Image(unsigned int width, unsigned int height) : width(width), height(height) { pixels.resize(width * height); }
 Image::Image(unsigned int width, unsigned int height, const std::vector<Color>& pixels) : width(width), height(height), pixels(pixels) {}
 Image::Image(unsigned int width, unsigned int height, std::vector<Color>&& pixels) : width(width), height(height), pixels(std::move(pixels)) {}

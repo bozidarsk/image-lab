@@ -32,6 +32,8 @@ public:
 	void ApplyMaterial(const Material& material);
 	void ApplyMaterial(const Material& material, Image& destination) const;
 
+	static Image ApplyMaterials(const Image& source, std::initializer_list<const Material> materials);
+
 	Image(unsigned int width, unsigned int height);
 	Image(unsigned int width, unsigned int height, const std::vector<Color>& pixels);
 	Image(unsigned int width, unsigned int height, std::vector<Color>&& pixels);
