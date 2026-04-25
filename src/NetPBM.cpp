@@ -1,4 +1,4 @@
-#include "NetBPM.h"
+#include "NetPBM.h"
 
 /*static*/ std::expected<NetBPM, std::string> NetBPM::Load(const std::string& path) 
 {
