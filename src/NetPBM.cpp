@@ -1,6 +1,6 @@
 #include "NetPBM.h"
 
-/*static*/ std::expected<NetBPM, std::string> NetBPM::Load(const std::string& path) 
+/*static*/ std::expected<NetPBM, std::string> NetPBM::Load(const std::string& path) 
 {
 	std::ifstream file(path);
 
@@ -98,10 +98,10 @@
 		}
 	}
 
-	return NetBPM(width, height, pixels);
+	return NetPBM(width, height, pixels);
 }
 
-/*static*/ void NetBPM::Save(const std::string& path, const Image& image) 
+/*static*/ void NetPBM::Save(const std::string& path, const Image& image) 
 {
 	std::ofstream file(path);
 
@@ -149,7 +149,7 @@
 	file.close();
 }
 
-NetBPM::NetBPM(unsigned int width, unsigned int height) : Image(width, height) {}
-NetBPM::NetBPM(unsigned int width, unsigned int height, const std::vector<Color>& pixels) : Image(width, height, pixels) {}
-NetBPM::NetBPM(unsigned int width, unsigned int height, std::vector<Color>&& pixels) : Image(width, height, std::move(pixels)) {}
-NetBPM::NetBPM(unsigned int width, unsigned int height, std::initializer_list<Color> pixels) : Image(width, height, pixels) {}
+NetPBM::NetPBM(unsigned int width, unsigned int height) : Image(width, height) {}
+NetPBM::NetPBM(unsigned int width, unsigned int height, const std::vector<Color>& pixels) : Image(width, height, pixels) {}
+NetPBM::NetPBM(unsigned int width, unsigned int height, std::vector<Color>&& pixels) : Image(width, height, std::move(pixels)) {}
+NetPBM::NetPBM(unsigned int width, unsigned int height, std::initializer_list<Color> pixels) : Image(width, height, pixels) {}
