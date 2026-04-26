@@ -7,7 +7,7 @@
 
 #include "Image.h"
 
-class NetBPM : public Image
+class NetPBM : public Image
 {
 private:
 	template<typename T>
@@ -42,11 +42,11 @@ private:
 	}
 
 public:
-	static std::expected<NetBPM, std::string> Load(const std::string& path);
+	static std::expected<NetPBM, std::string> Load(const std::string& path);
 	static void Save(const std::string& path, const Image& image);
 
-	NetBPM(unsigned int width, unsigned int height);
-	NetBPM(unsigned int width, unsigned int height, const std::vector<Color>& pixels);
-	NetBPM(unsigned int width, unsigned int height, std::vector<Color>&& pixels);
-	NetBPM(unsigned int width, unsigned int height, std::initializer_list<Color> pixels);
+	NetPBM(unsigned int width, unsigned int height);
+	NetPBM(unsigned int width, unsigned int height, const std::vector<Color>& pixels);
+	NetPBM(unsigned int width, unsigned int height, std::vector<Color>&& pixels);
+	NetPBM(unsigned int width, unsigned int height, std::initializer_list<Color> pixels);
 };
