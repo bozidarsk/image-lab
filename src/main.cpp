@@ -1,4 +1,5 @@
 #include <print>
+#include <array>
 #include <string>
 #include <vector>
 #include <optional>
@@ -51,20 +52,41 @@ static bool TryParse(const std::string& str, int* result)
 	return true;
 }
 
+static int strcmpi(const char* a, const char* b) 
+{
+	if (!a && !b) return 0;
+	if (a && !b) return *a;
+	if (!a && b) return -(*b);
+
+	int diff = 0;
+
+	while (*a && *b) 
+	{
+		diff = (int)std::tolower(*a) - (int)std::tolower(*b);
+
+		if (diff)
+			return diff;
+
+		a++;
+		b++;
+	}
+
+	return (int)std::tolower(*a) - (int)std::tolower(*b);
+}
 
 static const Material* GetMaterialByName(const std::string&	name) 
 {
-	if (!strcasecmp(name.c_str(), "Inverse")) return &Material::Inverse;
-	if (!strcasecmp(name.c_str(), "Grayscale")) return &Material::Grayscale;
-	if (!strcasecmp(name.c_str(), "ContrastStretch")) return &Material::ContrastStretch;
-	if (!strcasecmp(name.c_str(), "Blur")) return &Material::Blur;
-	if (!strcasecmp(name.c_str(), "Sharpen")) return &Material::Sharpen;
-	if (!strcasecmp(name.c_str(), "Emboss")) return &Material::Emboss;
-	if (!strcasecmp(name.c_str(), "Outline")) return &Material::Outline;
-	if (!strcasecmp(name.c_str(), "TopSobel")) return &Material::TopSobel;
-	if (!strcasecmp(name.c_str(), "BottomSobel")) return &Material::BottomSobel;
-	if (!strcasecmp(name.c_str(), "LeftSobel")) return &Material::LeftSobel;
-	if (!strcasecmp(name.c_str(), "RightSobel")) return &Material::RightSobel;
+	if (!strcmpi(name.c_str(), "Inverse")) return &Material::Inverse;
+	if (!strcmpi(name.c_str(), "Grayscale")) return &Material::Grayscale;
+	if (!strcmpi(name.c_str(), "ContrastStretch")) return &Material::ContrastStretch;
+	if (!strcmpi(name.c_str(), "Blur")) return &Material::Blur;
+	if (!strcmpi(name.c_str(), "Sharpen")) return &Material::Sharpen;
+	if (!strcmpi(name.c_str(), "Emboss")) return &Material::Emboss;
+	if (!strcmpi(name.c_str(), "Outline")) return &Material::Outline;
+	if (!strcmpi(name.c_str(), "TopSobel")) return &Material::TopSobel;
+	if (!strcmpi(name.c_str(), "BottomSobel")) return &Material::BottomSobel;
+	if (!strcmpi(name.c_str(), "LeftSobel")) return &Material::LeftSobel;
+	if (!strcmpi(name.c_str(), "RightSobel")) return &Material::RightSobel;
 
 	return nullptr;
 }

@@ -1,3 +1,6 @@
+#include <format>
+#include <cstdint>
+
 #include "NetPBM.h"
 
 /*static*/ std::expected<NetPBM, std::string> NetPBM::Load(const std::string& path) 
@@ -21,10 +24,10 @@
 	if (type == '1' || type == '4') 
 	{
 		if (auto value = ReadNext<unsigned int>(type, file)) width = *value;
-		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (ssize_t)file.tellg()));
+		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 		if (auto value = ReadNext<unsigned int>(type, file)) height = *value;
-		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (ssize_t)file.tellg()));
+		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 		unsigned int count = width * height;
 		pixels.reserve(count);
@@ -34,7 +37,7 @@
 			uint8_t x;
 
 			if (auto value = ReadNext<char>(type, file)) x = (*value == '0') ? 0xff : 0x00;
-			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (ssize_t)file.tellg()));
+			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 			pixels.emplace_back(x, x, x);
 		}
@@ -42,10 +45,10 @@
 	else if (type == '2' || type == '5') 
 	{
 		if (auto value = ReadNext<unsigned int>(type, file)) width = *value;
-		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (ssize_t)file.tellg()));
+		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 		if (auto value = ReadNext<unsigned int>(type, file)) height = *value;
-		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (ssize_t)file.tellg()));
+		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 		unsigned int count = width * height;
 		pixels.reserve(count);
@@ -53,14 +56,14 @@
 		uint16_t max;
 
 		if (auto value = ReadNext<uint16_t>(type, file)) max = *value;
-		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (ssize_t)file.tellg()));
+		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 		for (unsigned int i = 0; i < count; i++)
 		{
 			uint8_t x;
 
 			if (auto value = ReadNext<uint16_t>(type, file)) x = (uint8_t)(255.0 * ((float)(*value) / (float)max));
-			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (ssize_t)file.tellg()));
+			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 			pixels.emplace_back(x, x, x);
 		}
@@ -68,10 +71,10 @@
 	else if (type == '3' || type == '6') 
 	{
 		if (auto value = ReadNext<unsigned int>(type, file)) width = *value;
-		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (ssize_t)file.tellg()));
+		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 		if (auto value = ReadNext<unsigned int>(type, file)) height = *value;
-		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (ssize_t)file.tellg()));
+		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 		unsigned int count = width * height;
 		pixels.reserve(count);
@@ -79,20 +82,20 @@
 		uint16_t max;
 
 		if (auto value = ReadNext<uint16_t>(type, file)) max = *value;
-		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (ssize_t)file.tellg()));
+		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 		for (unsigned int i = 0; i < count; i++)
 		{
 			uint8_t r, g, b;
 
 			if (auto value = ReadNext<uint16_t>(type, file)) r = (uint8_t)(255.0 * ((float)(*value) / (float)max));
-			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (ssize_t)file.tellg()));
+			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 			if (auto value = ReadNext<uint16_t>(type, file)) g = (uint8_t)(255.0 * ((float)(*value) / (float)max));
-			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (ssize_t)file.tellg()));
+			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 			if (auto value = ReadNext<uint16_t>(type, file)) b = (uint8_t)(255.0 * ((float)(*value) / (float)max));
-			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (ssize_t)file.tellg()));
+			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 			pixels.emplace_back(r, g, b);
 		}
