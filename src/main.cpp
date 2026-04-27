@@ -71,7 +71,7 @@ static const Material* GetMaterialByName(const std::string&	name)
 
 static int Help(const ProgramArguments& args) 
 {
-	std::println("help [command] - prints a help message");
+	std::println("help - prints commands usage");
 	std::println("pwd - prints the working directory");
 	std::println("cd <dir> - changes the working directory");
 	std::println("load <path> [as <alias>] - loads an image file with an optional name/alias");
