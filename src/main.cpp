@@ -52,7 +52,7 @@ static bool TryParse(const std::string& str, int* result)
 	return true;
 }
 
-static int strcmpi(const char* a, const char* b) 
+static int __strcasecmp(const char* a, const char* b) 
 {
 	if (!a && !b) return 0;
 	if (a && !b) return *a;
@@ -76,17 +76,17 @@ static int strcmpi(const char* a, const char* b)
 
 static const Material* GetMaterialByName(const std::string&	name) 
 {
-	if (!strcmpi(name.c_str(), "Inverse")) return &Material::Inverse;
-	if (!strcmpi(name.c_str(), "Grayscale")) return &Material::Grayscale;
-	if (!strcmpi(name.c_str(), "ContrastStretch")) return &Material::ContrastStretch;
-	if (!strcmpi(name.c_str(), "Blur")) return &Material::Blur;
-	if (!strcmpi(name.c_str(), "Sharpen")) return &Material::Sharpen;
-	if (!strcmpi(name.c_str(), "Emboss")) return &Material::Emboss;
-	if (!strcmpi(name.c_str(), "Outline")) return &Material::Outline;
-	if (!strcmpi(name.c_str(), "TopSobel")) return &Material::TopSobel;
-	if (!strcmpi(name.c_str(), "BottomSobel")) return &Material::BottomSobel;
-	if (!strcmpi(name.c_str(), "LeftSobel")) return &Material::LeftSobel;
-	if (!strcmpi(name.c_str(), "RightSobel")) return &Material::RightSobel;
+	if (!__strcasecmp(name.c_str(), "Inverse")) return &Material::Inverse;
+	if (!__strcasecmp(name.c_str(), "Grayscale")) return &Material::Grayscale;
+	if (!__strcasecmp(name.c_str(), "ContrastStretch")) return &Material::ContrastStretch;
+	if (!__strcasecmp(name.c_str(), "Blur")) return &Material::Blur;
+	if (!__strcasecmp(name.c_str(), "Sharpen")) return &Material::Sharpen;
+	if (!__strcasecmp(name.c_str(), "Emboss")) return &Material::Emboss;
+	if (!__strcasecmp(name.c_str(), "Outline")) return &Material::Outline;
+	if (!__strcasecmp(name.c_str(), "TopSobel")) return &Material::TopSobel;
+	if (!__strcasecmp(name.c_str(), "BottomSobel")) return &Material::BottomSobel;
+	if (!__strcasecmp(name.c_str(), "LeftSobel")) return &Material::LeftSobel;
+	if (!__strcasecmp(name.c_str(), "RightSobel")) return &Material::RightSobel;
 
 	return nullptr;
 }
