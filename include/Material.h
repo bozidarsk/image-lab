@@ -8,9 +8,10 @@
 #include "Shader.h"
 #include "Uniforms.h"
 
-class Material 
+class Material
 {
 private:
+	std::string name;
 	Shader shader;
 	Uniforms uniforms;
 
@@ -27,6 +28,7 @@ public:
 	static const Material LeftSobel;
 	static const Material RightSobel;
 
+	const std::string& GetName() const;
 	const Shader& GetShader() const;
 	const Uniforms& GetUniforms() const;
 
@@ -35,8 +37,11 @@ public:
 	const std::any operator [] (const char* name) const;
 	const std::any operator [] (const std::string& name) const;
 
-	Material(const Shader& shader);
-	Material(const Shader& shader, const Uniforms& uniforms);
-	Material(const Shader& shader, Uniforms&& uniforms);
-	Material(const Shader& shader, std::initializer_list<std::pair<const std::string, std::any>> uniforms);
+	bool operator == (const Material& other) const;
+	bool operator != (const Material& other) const;
+
+	Material(const std::string& name, const Shader& shader);
+	Material(const std::string& name, const Shader& shader, const Uniforms& uniforms);
+	Material(const std::string& name, const Shader& shader, Uniforms&& uniforms);
+	Material(const std::string& name, const Shader& shader, std::initializer_list<std::pair<const std::string, std::any>> uniforms);
 };
