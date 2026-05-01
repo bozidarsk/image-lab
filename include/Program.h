@@ -7,7 +7,7 @@ using ProgramArguments = std::span<std::string>;
 
 typedef int(*ProgramEntryPoint)(const ProgramArguments& args);
 
-class Program 
+class Program
 {
 private:
 	std::string name;
@@ -16,6 +16,7 @@ private:
 public:
 	static const Program PrintWorkingDirectory;
 	static const Program ChangeWorkingDirectory;
+	static const Program ListDirectoryContents;
 
 	const std::string& GetName() const;
 	ProgramEntryPoint GetEntryPoint() const;

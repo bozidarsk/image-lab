@@ -14,13 +14,13 @@
 #include "NetPBM.h"
 
 template<typename T>
-struct Resource 
+struct Resource
 {
 	T resource;
 	std::optional<std::string> alias = std::nullopt;
 };
 
-struct LoadedImage 
+struct LoadedImage
 {
 	std::string path;
 	Resource<Image> image;
@@ -29,7 +29,7 @@ struct LoadedImage
 
 static std::vector<LoadedImage> loadedImages;
 
-static bool TryParse(const std::string& str, int* result) 
+static bool TryParse(const std::string& str, int* result)
 {
 	if (!result)
 		return false;
@@ -37,7 +37,7 @@ static bool TryParse(const std::string& str, int* result)
 	bool isNegative = str[0] == '-';
 	*result = 0;
 
-	for (int i = (isNegative || str[0] == '+') ? 1 : 0; i < str.length(); i++) 
+	for (int i = (isNegative || str[0] == '+') ? 1 : 0; i < str.length(); i++)
 	{
 		if (str[i] < '0' || str[i] > '9')
 			return false;
@@ -52,7 +52,7 @@ static bool TryParse(const std::string& str, int* result)
 	return true;
 }
 
-static int __strcasecmp(const char* a, const char* b) 
+static int __strcasecmp(const char* a, const char* b)
 {
 	if (!a && !b) return 0;
 	if (a && !b) return *a;
@@ -60,7 +60,7 @@ static int __strcasecmp(const char* a, const char* b)
 
 	int diff = 0;
 
-	while (*a && *b) 
+	while (*a && *b)
 	{
 		diff = (int)std::tolower(*a) - (int)std::tolower(*b);
 
@@ -74,7 +74,7 @@ static int __strcasecmp(const char* a, const char* b)
 	return (int)std::tolower(*a) - (int)std::tolower(*b);
 }
 
-static const Material* GetMaterialByName(const std::string&	name) 
+static const Material* GetMaterialByName(const std::string&	name)
 {
 	if (!__strcasecmp(name.c_str(), "Inverse")) return &Material::Inverse;
 	if (!__strcasecmp(name.c_str(), "Grayscale")) return &Material::Grayscale;
@@ -91,11 +91,12 @@ static const Material* GetMaterialByName(const std::string&	name)
 	return nullptr;
 }
 
-static int Help(const ProgramArguments& args) 
+static int Help(const ProgramArguments& args)
 {
 	std::println("help - prints commands usage");
 	std::println("pwd - prints the working directory");
 	std::println("cd <dir> - changes the working directory");
+	std::println("ls [dir] - list directory contents");
 	std::println("load <path> [as <alias>] - loads an image file with an optional name/alias");
 	std::println("add-filter <image> <filter> [as <alias>] - adds a filter with an optional name/alias to be applied to the image");
 	std::println("remove-filter <image> {{<filter>|<filter-index>}} - removes the specified filter from an image");
@@ -109,19 +110,19 @@ static int Help(const ProgramArguments& args)
 	return 0;
 }
 
-static int Load(const ProgramArguments& args) 
+static int Load(const ProgramArguments& args)
 {
 	// load <path> [as <alias>]
 
-	if (args.size() != 1 && args.size() != 3) 
+	if (args.size() != 1 && args.size() != 3)
 	{
 		std::println(stderr, "Invalid arguments.");
 		return 1;
 	}
-	else if (args.size() == 1) 
+	else if (args.size() == 1)
 	{
 		auto image = NetPBM::Load(args[0]);
-		if (!image) 
+		if (!image)
 		{
 			std::println(stderr, "Failed to load image.");
 			std::println(stderr, "{}", image.error());
@@ -131,16 +132,16 @@ static int Load(const ProgramArguments& args)
 
 		loadedImages.push_back({ .path = args[0], .image = { .resource = image.value() } });
 	}
-	else if (args.size() == 3) 
+	else if (args.size() == 3)
 	{
-		if (args[1] != "as") 
+		if (args[1] != "as")
 		{
 			std::println(stderr, "Invalid arguments.");
 			return 1;
 		}
 
 		auto image = NetPBM::Load(args[0]);
-		if (!image) 
+		if (!image)
 		{
 			std::println(stderr, "Failed to load image.");
 			std::println(stderr, "{}", image.error());
@@ -154,26 +155,26 @@ static int Load(const ProgramArguments& args)
 	return 0;
 }
 
-static int AddFilter(const ProgramArguments& args) 
+static int AddFilter(const ProgramArguments& args)
 {
 	// add-filter <image> <filter> [as <alias>]
 
-	if (args.size() != 2 && args.size() != 4) 
+	if (args.size() != 2 && args.size() != 4)
 	{
 		std::println(stderr, "Invalid arguments.");
 		return 1;
 	}
-	else if (args.size() == 2) 
+	else if (args.size() == 2)
 	{
 		auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.path == args[0] || x.image.alias == args[0]; });
-		if (loadedImage == loadedImages.end()) 
+		if (loadedImage == loadedImages.end())
 		{
 			std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
 			return 2;
 		}
 
 		auto filter = GetMaterialByName(args[1]);
-		if (!filter) 
+		if (!filter)
 		{
 			std::println(stderr, "Cannot find filter '{}'.", args[1]);
 			return 2;
@@ -181,23 +182,23 @@ static int AddFilter(const ProgramArguments& args)
 
 		loadedImage->filters.push_back({ .resource = *filter, .alias = args[1] });
 	}
-	else if (args.size() == 4) 
+	else if (args.size() == 4)
 	{
-		if (args[2] != "as") 
+		if (args[2] != "as")
 		{
 			std::println(stderr, "Invalid arguments.");
 			return 1;
 		}
 
 		auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.path == args[0] || x.image.alias == args[0]; });
-		if (loadedImage == loadedImages.end()) 
+		if (loadedImage == loadedImages.end())
 		{
 			std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
 			return 2;
 		}
 
 		auto filter = GetMaterialByName(args[1]);
-		if (!filter) 
+		if (!filter)
 		{
 			std::println(stderr, "Cannot find filter '{}'.", args[1]);
 			return 2;
@@ -209,28 +210,28 @@ static int AddFilter(const ProgramArguments& args)
 	return 0;
 }
 
-static int RemoveFilter(const ProgramArguments& args) 
+static int RemoveFilter(const ProgramArguments& args)
 {
 	// remove-filter <image> {{<filter>|<filter-index>}}
 
-	if (args.size() != 2) 
+	if (args.size() != 2)
 	{
 		std::println(stderr, "Invalid arguments.");
 		return 1;
 	}
 
 	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.path == args[0] || x.image.alias == args[0]; });
-	if (loadedImage == loadedImages.end()) 
+	if (loadedImage == loadedImages.end())
 	{
 		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
 		return 2;
 	}
 
 	auto filter = std::find_if(loadedImage->filters.begin(), loadedImage->filters.end(), [&args](const Resource<Material>& x) { return x.alias == args[1]; });
-	if (filter == loadedImage->filters.end()) 
+	if (filter == loadedImage->filters.end())
 	{
 		int index;
-		if (TryParse(args[1], &index)) 
+		if (TryParse(args[1], &index))
 		{
 			if (index < 0)
 				index = loadedImage->filters.size() + index;
@@ -247,18 +248,18 @@ static int RemoveFilter(const ProgramArguments& args)
 	return 0;
 }
 
-static int ShowFilters(const ProgramArguments& args) 
+static int ShowFilters(const ProgramArguments& args)
 {
 	// show-filters <image>
 
-	if (args.size() != 1) 
+	if (args.size() != 1)
 	{
 		std::println(stderr, "Invalid arguments.");
 		return 1;
 	}
 
 	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.path == args[0] || x.image.alias == args[0]; });
-	if (loadedImage == loadedImages.end()) 
+	if (loadedImage == loadedImages.end())
 	{
 		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
 		return 2;
@@ -274,13 +275,13 @@ static int ShowFilters(const ProgramArguments& args)
 	return 0;
 }
 
-static int ShowAllFilters(const ProgramArguments& args) 
+static int ShowAllFilters(const ProgramArguments& args)
 {
 	// show-all-filters
 
 	std::array<std::string, 1> newArgs;
 
-	for (const LoadedImage& x : loadedImages) 
+	for (const LoadedImage& x : loadedImages)
 	{
 		newArgs[0] = x.path;
 		ShowFilters(newArgs);
@@ -289,18 +290,18 @@ static int ShowAllFilters(const ProgramArguments& args)
 	return 0;
 }
 
-static int Run(const ProgramArguments& args) 
+static int Run(const ProgramArguments& args)
 {
 	// run <image>
 
-	if (args.size() != 1) 
+	if (args.size() != 1)
 	{
 		std::println(stderr, "Invalid arguments.");
 		return 1;
 	}
 
 	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.path == args[0] || x.image.alias == args[0]; });
-	if (loadedImage == loadedImages.end()) 
+	if (loadedImage == loadedImages.end())
 	{
 		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
 		return 2;
@@ -313,7 +314,7 @@ static int Run(const ProgramArguments& args)
 	if (loadedImage->image.alias) std::print(" (as '{}')", loadedImage->image.alias.value());
 	std::println(":");
 
-	for (size_t i = 0; i < loadedImage->filters.size(); i++) 
+	for (size_t i = 0; i < loadedImage->filters.size(); i++)
 	{
 		std::println("Filter: [{}] '{}'", i, loadedImage->filters[i].alias.value());
 
@@ -330,13 +331,13 @@ static int Run(const ProgramArguments& args)
 	return 0;
  }
 
-static int RunAll(const ProgramArguments& args) 
+static int RunAll(const ProgramArguments& args)
 {
 	// run-all
 
 	std::array<std::string, 1> newArgs;
 
-	for (const LoadedImage& x : loadedImages) 
+	for (const LoadedImage& x : loadedImages)
 	{
 		newArgs[0] = x.path;
 		Run(newArgs);
@@ -345,18 +346,18 @@ static int RunAll(const ProgramArguments& args)
 	return 0;
 }
 
-static int Save(const ProgramArguments& args) 
+static int Save(const ProgramArguments& args)
 {
 	// save <image> [file]
 
-	if (args.size() != 1 && args.size() != 2) 
+	if (args.size() != 1 && args.size() != 2)
 	{
 		std::println(stderr, "Invalid arguments.");
 		return 1;
 	}
 
 	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.path == args[0] || x.image.alias == args[0]; });
-	if (loadedImage == loadedImages.end()) 
+	if (loadedImage == loadedImages.end())
 	{
 		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
 		return 2;
@@ -374,17 +375,18 @@ static int Save(const ProgramArguments& args)
 	return 0;
 }
 
-static int Quit(const ProgramArguments& args) 
+static int Quit(const ProgramArguments& args)
 {
 	exit(0);
 }
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
-	auto programs = 
+	auto programs =
 	{
 		Program::PrintWorkingDirectory,
 		Program::ChangeWorkingDirectory,
+		Program::ListDirectoryContents,
 		Program("help", &Help),
 		Program("load", &Load),
 		Program("add-filter", &AddFilter),
@@ -401,7 +403,7 @@ int main(int argc, char** argv)
 	std::string prompt = "> ";
 	std::string input;
 
-	while (true) 
+	while (true)
 	{
 		std::print("{}", prompt);
 
