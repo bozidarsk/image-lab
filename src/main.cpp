@@ -95,7 +95,7 @@ static int Help(const ProgramArguments& args)
 {
 	std::println("help - prints commands usage");
 	std::println("pwd - prints the working directory");
-	std::println("cd <dir> - changes the working directory");
+	std::println("cd [dir] - changes the working directory");
 	std::println("ls [dir] - list directory contents");
 	std::println("load <path> [as <alias>] - loads an image file with an optional name/alias");
 	std::println("add-filter <image> <filter> [as <alias>] - adds a filter with an optional name/alias to be applied to the image");
