@@ -22,10 +22,16 @@ static int pwd(const ProgramArguments& args)
 
 static int cd(const ProgramArguments& args)
 {
-	if (args.size() == 0)
-		return 1;
+	static std::string fallbackPath = getenv("HOME");
+	std::string& path = (args.size() != 0) ? args[0] : fallbackPath;
 
-	return chdir(args[0].c_str()) ? errno : 0;
+	if (!std::filesystem::is_directory(path))
+	{
+		std::println(stderr, "No such directory '{}'.", path);
+		return 1;
+	}
+
+	return chdir(path.c_str()) ? errno : 0;
 }
 #else
 #include <windows.h>
@@ -44,10 +50,16 @@ static int pwd(const ProgramArguments& args)
 
 static int cd(const ProgramArguments& args)
 {
-	if (args.size() == 0)
-		return 1;
+	static std::string fallbackPath = getenv("USERPROFILE");
+	std::string& path = (args.size() != 0) ? args[0] : fallbackPath;
 
-	return !SetCurrentDirectory(args[0].c_str());
+	if (!std::filesystem::is_directory(path))
+	{
+		std::println(stderr, "No such directory '{}'.", path);
+		return 1;
+	}
+
+	return !SetCurrentDirectory(path.c_str());
 }
 #endif
 
