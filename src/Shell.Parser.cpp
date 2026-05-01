@@ -4,19 +4,28 @@
 
 #include "Shell.h"
 
-/*static*/ void Shell::Parser::ProcessEnvironmentVariables(std::vector<Token>& tokens) 
+/*static*/ void Shell::Parser::ProcessEnvironmentVariables(std::vector<Token>& tokens)
 {
-	auto findStart = [](std::vector<Shell::Parser::Token>::iterator begin, std::vector<Shell::Parser::Token>::iterator end, bool* canBeExpanded) 
+	auto findStart = [&tokens](size_t begin, size_t end, bool* canBeExpanded)
 	{
-		auto dollar = std::find_if(begin, end, [](const Token& x) { return x.value == '$' && (x.flags & Token::Flags::Escaped) == 0; });
+		auto dollar = end;
 
-		if (dollar == end) 
+		for (auto i = begin; i < end; i++)
+		{
+			if (tokens[i].value == '$' && (tokens[i].flags & Token::Flags::Escaped) == 0)
+			{
+				dollar = i;
+				break;
+			}
+		}
+
+		if (dollar == end)
 		{
 			*canBeExpanded = false;
 			return end;
 		}
 
-		if ((dollar->flags & Token::Flags::SingleQuoted) == 0) 
+		if ((tokens[dollar].flags & Token::Flags::SingleQuoted) == 0)
 		{
 			*canBeExpanded = true;
 			return dollar;
@@ -24,28 +33,38 @@
 
 		auto position = dollar;
 
-		while (position != begin && (dollar->flags & Token::Flags::Quoted) == (position->flags & Token::Flags::Quoted))
+		while (position != begin && (tokens[dollar].flags & Token::Flags::Quoted) == (tokens[position].flags & Token::Flags::Quoted))
 			position--;
 
-		*canBeExpanded = (position->flags & Token::Flags::SingleQuoted) == 0;
+		*canBeExpanded = (tokens[position].flags & Token::Flags::SingleQuoted) == 0;
 		return dollar;
 	};
 
 	bool canBeExpanded;
 
 	for (
-		auto start = findStart(tokens.begin(), tokens.end(), &canBeExpanded);
-		start != tokens.end();
-		start = findStart(start + 1, tokens.end(), &canBeExpanded)
+		auto start = findStart(0, tokens.size(), &canBeExpanded);
+		start < tokens.size();
+		start = findStart(start + 1, tokens.size(), &canBeExpanded)
 	)
 	{
 		if (!canBeExpanded)
 			continue;
 
-		auto stop = std::find_if(start + 1, tokens.end(), [](const Token& x) { return !std::isalnum(x.value) && x.value != '_'; });
+		auto stop = tokens.size();
+
+		for (auto i = start + 1; i < tokens.size(); i++)
+		{
+			if (!std::isalnum(tokens[i].value) && tokens[i].value != '_')
+			{
+				stop = i;
+				break;
+			}
+		}
 
 		std::string name;
-		std::transform(start + 1, stop, std::back_inserter(name), [](const Token& x) { return x.value; });
+		name.reserve(stop - start);
+		std::transform(tokens.begin() + start + 1, tokens.begin() + stop, std::back_inserter(name), [](const Token& x) { return x.value; });
 
 		if (name.length() == 0)
 			continue;
@@ -53,14 +72,14 @@
 		const char* value = getenv(name.c_str());
 		if (!value) value = "";
 
-		const Token::Flags tokenFlags = start->flags;
+		const Token::Flags tokenFlags = tokens[start].flags;
 
-		tokens.erase(start, stop);
-		std::transform(value, value + strlen(value), std::inserter(tokens, start), [&tokenFlags](char x) { return Token(x, tokenFlags | Token::Flags::Escaped); });
+		tokens.erase(tokens.begin() + start, tokens.begin() + stop);
+		std::transform(value, value + strlen(value), std::inserter(tokens, tokens.begin() + start), [&tokenFlags](char x) { return Token(x, tokenFlags | Token::Flags::Escaped); });
 	}
 }
 
-/*static*/ std::vector<Shell::Parser::Token> Shell::Parser::Tokenize(const std::string& input) 
+/*static*/ std::vector<Shell::Parser::Token> Shell::Parser::Tokenize(const std::string& input)
 {
 	std::vector<Token> tokens;
 	Token::Flags flags = Token::Flags::None;
@@ -71,15 +90,15 @@
 		position++
 	)
 	{
-		if (*position == '\\' && (flags & Token::Flags::Escaped) == 0) 
+		if (*position == '\\' && (flags & Token::Flags::Escaped) == 0)
 		{
 			flags |= Token::Flags::Escaped;
 			continue;
 		}
 
-		if ((flags & Token::Flags::Escaped) != 0) 
+		if ((flags & Token::Flags::Escaped) != 0)
 		{
-			switch (*position) 
+			switch (*position)
 			{
 				case 'n': tokens.emplace_back('\n', flags); break;
 				case 'r': tokens.emplace_back('\r', flags); break;
@@ -91,27 +110,27 @@
 			continue;
 		}
 
-		switch (*position) 
+		switch (*position)
 		{
 			case '\"':
-				if ((flags & Token::Flags::DoubleQuoted) == 0) 
+				if ((flags & Token::Flags::DoubleQuoted) == 0)
 				{
 					tokens.emplace_back(*position, flags);
 					flags |= Token::Flags::DoubleQuoted;
 				}
-				else 
+				else
 				{
 					flags &= ~Token::Flags::DoubleQuoted;
 					tokens.emplace_back(*position, flags);
 				}
 				continue;
 			case '\'':
-				if ((flags & Token::Flags::SingleQuoted) == 0) 
+				if ((flags & Token::Flags::SingleQuoted) == 0)
 				{
 					tokens.emplace_back(*position, flags);
 					flags |= Token::Flags::SingleQuoted;
 				}
-				else 
+				else
 				{
 					flags &= ~Token::Flags::SingleQuoted;
 					tokens.emplace_back(*position, flags);
@@ -136,7 +155,7 @@
 	return tokens;
 }
 
-/*static*/ std::vector<std::string> Shell::Parser::Parse(const std::string& command) 
+/*static*/ std::vector<std::string> Shell::Parser::Parse(const std::string& command)
 {
 	std::vector<Token> tokens = Tokenize(command);
 
@@ -146,11 +165,11 @@
 	std::vector<char> chunk;
 	chunk.reserve(tokens.size());
 
-	for (auto position = tokens.begin(); position != tokens.end(); position++) 
+	for (auto position = tokens.begin(); position != tokens.end(); position++)
 	{
-		if (position->value == '\"' || position->value == '\'') 
+		if (position->value == '\"' || position->value == '\'')
 		{
-			if ((position->flags & Token::Flags::Escaped) == 0 && (position->flags & Token::Flags::Quoted) == 0) 
+			if ((position->flags & Token::Flags::Escaped) == 0 && (position->flags & Token::Flags::Quoted) == 0)
 			{
 				const char quote = position->value;
 				position++;
@@ -166,7 +185,7 @@
 			}
 		}
 
-		if (position->value == ' ' && (position->flags & Token::Flags::Escaped) == 0) 
+		if (position->value == ' ' && (position->flags & Token::Flags::Escaped) == 0)
 		{
 			chunks.emplace_back(chunk.begin(), chunk.end());
 			chunk.clear();
