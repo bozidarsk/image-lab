@@ -3,20 +3,20 @@
 
 #include "Shell.h"
 
-int Shell::Run(const std::string& command) const 
+int Shell::Run(const std::string& command) const
 {
 	auto values = Parser::Parse(command);
 
-	return Run(values[0], ProgramArguments(values.begin() + 1, values.end()));
+	return (values.size() > 0) ? Run(values[0], ProgramArguments(values.begin() + 1, values.end())) : 0;
 }
 
-int Shell::Run(const std::string& name, const ProgramArguments& args) const 
+int Shell::Run(const std::string& name, const ProgramArguments& args) const
 {
 	const auto program = std::find_if(programs.begin(), programs.end(), [&name](const Program& x) { return x.GetName() == name; });
 
 	if (program != programs.end())
 		return program->Run(args);
-	else 
+	else
 	{
 		std::println(stderr, "Shell::Run - Unknown program '{}'.", name);
 		return -1;
