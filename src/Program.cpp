@@ -90,10 +90,10 @@ static int ls(const ProgramArguments& args)
 			std::print("{}", ((permissions & std::filesystem::perms::others_write) != std::filesystem::perms::none) ? 'w' : '-');
 			std::print("{}", ((permissions & std::filesystem::perms::others_exec) != std::filesystem::perms::none) ? 'x' : '-');
 
-			std::print(" {}", item.path().filename().c_str());
+			std::print(" {}", item.path().filename().string());
 
 			if (item.is_symlink())
-				std::print(" -> {}", std::filesystem::read_symlink(item.path()).c_str());
+				std::print(" -> {}", std::filesystem::read_symlink(item.path()).string());
 
 			std::println();
 		}
