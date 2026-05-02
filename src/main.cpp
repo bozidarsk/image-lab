@@ -166,7 +166,7 @@ static int AddFilter(const ProgramArguments& args)
 	}
 	else if (args.size() == 2)
 	{
-		auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.path == args[0] || x.image.alias == args[0]; });
+		auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.image.alias == args[0] || x.path == args[0]; });
 		if (loadedImage == loadedImages.end())
 		{
 			std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
@@ -190,7 +190,7 @@ static int AddFilter(const ProgramArguments& args)
 			return 1;
 		}
 
-		auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.path == args[0] || x.image.alias == args[0]; });
+		auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.image.alias == args[0] || x.path == args[0]; });
 		if (loadedImage == loadedImages.end())
 		{
 			std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
@@ -220,7 +220,7 @@ static int RemoveFilter(const ProgramArguments& args)
 		return 1;
 	}
 
-	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.path == args[0] || x.image.alias == args[0]; });
+	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.image.alias == args[0] || x.path == args[0]; });
 	if (loadedImage == loadedImages.end())
 	{
 		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
@@ -258,7 +258,7 @@ static int ShowFilters(const ProgramArguments& args)
 		return 1;
 	}
 
-	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.path == args[0] || x.image.alias == args[0]; });
+	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.image.alias == args[0] || x.path == args[0]; });
 	if (loadedImage == loadedImages.end())
 	{
 		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
@@ -304,7 +304,7 @@ static int Run(const ProgramArguments& args)
 		return 1;
 	}
 
-	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.path == args[0] || x.image.alias == args[0]; });
+	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.image.alias == args[0] || x.path == args[0]; });
 	if (loadedImage == loadedImages.end())
 	{
 		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
@@ -361,7 +361,7 @@ static int Save(const ProgramArguments& args)
 		return 1;
 	}
 
-	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.path == args[0] || x.image.alias == args[0]; });
+	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.image.alias == args[0] || x.path == args[0]; });
 	if (loadedImage == loadedImages.end())
 	{
 		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
