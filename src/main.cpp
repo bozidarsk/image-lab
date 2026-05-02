@@ -212,7 +212,7 @@ static int AddFilter(const ProgramArguments& args)
 
 static int RemoveFilter(const ProgramArguments& args)
 {
-	// remove-filter <image> {{<filter>|<filter-index>}}
+	// remove-filter <image> {<filter>|<filter-index>}
 
 	if (args.size() != 2)
 	{
