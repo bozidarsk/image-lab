@@ -318,30 +318,13 @@ static int Run(const ProgramArguments& args)
 	{
 		std::println("Filter: [{}] '{}'", i, loadedImage->filters[i].alias.value());
 
-		Material& material = loadedImage->filters[i].resource;
-
-		if (material == Material::ContrastStretch)
-		{
-			Color min(0x00, 0x00, 0x00, 0x00);
-			Color max(0xff, 0xff, 0xff, 0xff);
-
-			for (const Color& color : loadedImage->image.resource.GetPixels())
-			{
-				if (color < min) min = color;
-				if (color > max) max = color;
-			}
-
-			material["min"] = min;
-			material["max"] = max;
-		}
-
 		source = destination;
-		source.ApplyMaterial(material, destination);
+		source.ApplyMaterial(loadedImage->filters[i].resource, destination);
 
 		std::println("Done");
 	}
 
-	loadedImage->image.resource = destination;
+	loadedImage->image.resource = std::move(destination);
 
 	return 0;
  }

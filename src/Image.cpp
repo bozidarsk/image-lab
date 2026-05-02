@@ -1,6 +1,7 @@
 #include <cassert>
 
 #include "Image.h"
+#include "Properties.h"
 
 unsigned int Image::GetWidth() const { return width; }
 unsigned int Image::GetHeight() const { return height; }
@@ -40,27 +41,34 @@ const Color& Image::operator [] (int x, int y) const
 
 void Image::ApplyMaterial(const Material& material)
 {
-	auto& shader = material.GetShader();
-	auto& uniforms = material.GetUniforms();
-	auto shaderEntryPoint = shader.GetEntryPoint();
-
-	for (int y = 0; y < height; y++)
-		for (int x = 0; x < width; x++)
-			pixels[y * width + x] = shaderEntryPoint(x, y, *this, uniforms);
+	ApplyMaterial(material, *this);
 }
 
 void Image::ApplyMaterial(const Material& material, Image& destination) const
 {
-	auto& shader = material.GetShader();
-	auto& uniforms = material.GetUniforms();
-	auto shaderEntryPoint = shader.GetEntryPoint();
+	const Uniforms& uniforms = material.GetUniforms();
+	Properties input, output;
 
-	assert(width == destination.width);
-	assert(height == destination.height);
+	for (const Shader& shader : material.GetShaders())
+	{
+		input.Set<const Image*>("image", this);
 
-	for (int y = 0; y < height; y++)
-		for (int x = 0; x < width; x++)
-			destination.pixels[y * width + x] = shaderEntryPoint(x, y, *this, uniforms);
+		for (int y = 0; y < height; y++)
+		{
+			input.Set<int>("y", y);
+
+			for (int x = 0; x < width; x++)
+			{
+				input.Set<Color>("color", pixels[y * width + x]);
+				input.Set<int>("x", x);
+
+				shader(input, output, uniforms);
+				destination[y * width + x] = output.Has<Color>("color") ? output.Get<Color>("color") : Color(0, 0, 0);
+			}
+		}
+
+		input = output;
+	}
 }
 
 /*static*/ Image Image::ApplyMaterials(const Image& image, std::initializer_list<const Material> materials)

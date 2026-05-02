@@ -2,7 +2,7 @@
 
 #include <any>
 #include <string>
-#include <utility>
+#include <vector>
 #include <initializer_list>
 
 #include "Shader.h"
@@ -12,7 +12,7 @@ class Material
 {
 private:
 	std::string name;
-	Shader shader;
+	std::vector<Shader> shaders;
 	Uniforms uniforms;
 
 public:
@@ -29,19 +29,22 @@ public:
 	static const Material RightSobel;
 
 	const std::string& GetName() const;
-	const Shader& GetShader() const;
-	const Uniforms& GetUniforms() const;
 
-	std::any& operator [] (const char* name);
-	std::any& operator [] (const std::string& name);
-	const std::any operator [] (const char* name) const;
-	const std::any operator [] (const std::string& name) const;
+	void SetShaders(const std::vector<Shader>& shaders);
+	void SetShaders(std::vector<Shader>&& shaders);
+	std::vector<Shader>& GetShaders();
+	const std::vector<Shader>& GetShaders() const;
+
+	void SetUniforms(const Uniforms& uniforms);
+	void SetUniforms(Uniforms&& uniforms);
+	Uniforms& GetUniforms();
+	const Uniforms& GetUniforms() const;
 
 	bool operator == (const Material& other) const;
 	bool operator != (const Material& other) const;
 
-	Material(const std::string& name, const Shader& shader);
-	Material(const std::string& name, const Shader& shader, const Uniforms& uniforms);
-	Material(const std::string& name, const Shader& shader, Uniforms&& uniforms);
-	Material(const std::string& name, const Shader& shader, std::initializer_list<std::pair<const std::string, std::any>> uniforms);
+	Material(const std::string& name, std::initializer_list<Shader> shaders);
+	Material(const std::string& name, std::initializer_list<Shader> shaders, const Uniforms& uniforms);
+	Material(const std::string& name, std::initializer_list<Shader> shaders, Uniforms&& uniforms);
+	Material(const std::string& name, std::initializer_list<Shader> shaders, std::initializer_list<std::pair<const std::string, std::any>> uniforms);
 };

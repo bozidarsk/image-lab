@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Color.h"
 #include "Uniforms.h"
+#include "Properties.h"
 
-class Image;
-typedef Color(*ShaderEntryPoint)(int x, int y, const Image& input, const Uniforms& uniforms);
+typedef void(*ShaderEntryPoint)(const Properties&, Properties&, const Uniforms& uniforms);
 
 class Shader
 {
@@ -12,12 +11,13 @@ private:
 	ShaderEntryPoint entryPoint;
 
 public:
-	static Color Inverse(int x, int y, const Image& input, const Uniforms& uniforms);
-	static Color Grayscale(int x, int y, const Image& input, const Uniforms& uniforms);
-	static Color ContrastStretch(int x, int y, const Image& input, const Uniforms& uniforms);
-	static Color ImageKernel(int x, int y, const Image& input, const Uniforms& uniforms);
+	static void MinMax(const Properties& input, Properties& output, const Uniforms& uniforms);
+	static void Inverse(const Properties& input, Properties& output, const Uniforms& uniforms);
+	static void Grayscale(const Properties& input, Properties& output, const Uniforms& uniforms);
+	static void ContrastStretch(const Properties& input, Properties& output, const Uniforms& uniforms);
+	static void ImageKernel(const Properties& input, Properties& output, const Uniforms& uniforms);
 
-	ShaderEntryPoint GetEntryPoint() const;
+	void operator () (const Properties& input, Properties& output, const Uniforms& uniforms) const;
 
 	Shader(ShaderEntryPoint entryPoint);
 };
