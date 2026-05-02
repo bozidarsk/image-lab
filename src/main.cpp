@@ -363,7 +363,7 @@ static int Save(const ProgramArguments& args)
 
 	std::string path = (args.size() == 1) ? loadedImage->path : args[1];
 
-	std::println("Saving image '{}'", args[0]);
+	std::print("Saving image '{}'", args[0]);
 	if (loadedImage->image.alias) std::print(" (as '{}')", loadedImage->image.alias.value());
 	std::println(" to '{}'.", path);
 
