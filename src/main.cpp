@@ -180,7 +180,7 @@ static int AddFilter(const ProgramArguments& args)
 			return 2;
 		}
 
-		loadedImage->filters.push_back({ .resource = *filter, .alias = args[1] });
+		loadedImage->filters.push_back({ .resource = *filter });
 	}
 	else if (args.size() == 4)
 	{
@@ -227,7 +227,7 @@ static int RemoveFilter(const ProgramArguments& args)
 		return 2;
 	}
 
-	auto filter = std::find_if(loadedImage->filters.begin(), loadedImage->filters.end(), [&args](const Resource<Material>& x) { return x.alias == args[1]; });
+	auto filter = std::find_if(loadedImage->filters.begin(), loadedImage->filters.end(), [&args](const Resource<Material>& x) { return x.alias == args[1] || x.resource.GetName() == args[1]; });
 	if (filter == loadedImage->filters.end())
 	{
 		int index;
@@ -270,7 +270,11 @@ static int ShowFilters(const ProgramArguments& args)
 	std::println(":");
 
 	for (size_t i = 0; i < loadedImage->filters.size(); i++)
-		std::println("[{}]: '{}'", i, loadedImage->filters[i].alias.value());
+	{
+		std::print("[{}]: '{}'", i, loadedImage->filters[i].resource.GetName());
+		if (loadedImage->filters[i].alias) std::print(" (as '{}')", loadedImage->filters[i].alias.value());
+		std::println();
+	}
 
 	return 0;
 }
@@ -316,7 +320,10 @@ static int Run(const ProgramArguments& args)
 
 	for (size_t i = 0; i < loadedImage->filters.size(); i++)
 	{
-		std::println("Filter: [{}] '{}'", i, loadedImage->filters[i].alias.value());
+		std::print("Filter: ");
+		std::print("[{}]: '{}'", i, loadedImage->filters[i].resource.GetName());
+		if (loadedImage->filters[i].alias) std::print(" (as '{}')", loadedImage->filters[i].alias.value());
+		std::println();
 
 		source = destination;
 		source.ApplyMaterial(loadedImage->filters[i].resource, destination);
