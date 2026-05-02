@@ -6,7 +6,7 @@
 class Image;
 typedef Color(*ShaderEntryPoint)(int x, int y, const Image& input, const Uniforms& uniforms);
 
-class Shader 
+class Shader
 {
 private:
 	ShaderEntryPoint entryPoint;

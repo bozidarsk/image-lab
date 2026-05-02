@@ -11,18 +11,18 @@ class NetPBM : public Image
 {
 private:
 	template<typename T>
-	static std::optional<T> ReadNext(char type, std::ifstream& file) 
+	static std::optional<T> ReadNext(char type, std::ifstream& file)
 	{
 		if (file.eof())
 			return std::nullopt;
 
 		T value;
 
-		if ((type & 0b100) == 0) 
+		if ((type & 0b100) == 0)
 		{
 			file >> std::ws;
 
-			while (file.peek() == '#') 
+			while (file.peek() == '#')
 			{
 				for (char x = file.get(); x != '\r' && x != '\n' && x != EOF; x = file.get());
 				file >> std::ws;
@@ -33,7 +33,7 @@ private:
 
 			file >> value;
 		}
-		else 
+		else
 		{
 			file.read((char*)(&value), sizeof(value));
 		}

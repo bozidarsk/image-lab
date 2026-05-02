@@ -10,7 +10,7 @@
 #include "Color.h"
 #include "Material.h"
 
-class Image 
+class Image
 {
 private:
 	unsigned int width, height;

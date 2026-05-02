@@ -3,7 +3,7 @@
 
 #include "NetPBM.h"
 
-/*static*/ std::expected<NetPBM, std::string> NetPBM::Load(const std::string& path) 
+/*static*/ std::expected<NetPBM, std::string> NetPBM::Load(const std::string& path)
 {
 	std::ifstream file(path);
 
@@ -21,7 +21,7 @@
 	unsigned int width, height;
 	std::vector<Color> pixels;
 
-	if (type == '1' || type == '4') 
+	if (type == '1' || type == '4')
 	{
 		if (auto value = ReadNext<unsigned int>(type, file)) width = *value;
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
@@ -32,7 +32,7 @@
 		unsigned int count = width * height;
 		pixels.reserve(count);
 
-		for (unsigned int i = 0; i < count; i++) 
+		for (unsigned int i = 0; i < count; i++)
 		{
 			uint8_t x;
 
@@ -42,7 +42,7 @@
 			pixels.emplace_back(x, x, x);
 		}
 	}
-	else if (type == '2' || type == '5') 
+	else if (type == '2' || type == '5')
 	{
 		if (auto value = ReadNext<unsigned int>(type, file)) width = *value;
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
@@ -68,7 +68,7 @@
 			pixels.emplace_back(x, x, x);
 		}
 	}
-	else if (type == '3' || type == '6') 
+	else if (type == '3' || type == '6')
 	{
 		if (auto value = ReadNext<unsigned int>(type, file)) width = *value;
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
@@ -104,7 +104,7 @@
 	return NetPBM(width, height, pixels);
 }
 
-/*static*/ void NetPBM::Save(const std::string& path, const Image& image) 
+/*static*/ void NetPBM::Save(const std::string& path, const Image& image)
 {
 	std::ofstream file(path);
 
@@ -113,12 +113,12 @@
 
 	char type = '1';
 
-	for (const Color& pixel : image.GetPixels()) 
+	for (const Color& pixel : image.GetPixels())
 	{
 		if (type == '1' && (pixel.r != pixel.g || pixel.g != pixel.b || (pixel.r != 0x00 && pixel.r != 0xff) || (pixel.g != 0x00 && pixel.g != 0xff) || (pixel.b != 0x00 && pixel.b != 0xff)))
 			type = '2';
 
-		if (type == '2' && (pixel.r != pixel.g || pixel.g != pixel.b)) 
+		if (type == '2' && (pixel.r != pixel.g || pixel.g != pixel.b))
 		{
 			type = '3';
 			break;
@@ -128,19 +128,19 @@
 	file << 'P' << type << '\n';
 	file << image.GetWidth() << ' ' << image.GetHeight() << '\n';
 
-	if (type == '1') 
+	if (type == '1')
 	{
 		for (const Color& pixel : image.GetPixels())
 			file << ((pixel.r == 0xff) ? '0' : '1') << ' ';
 	}
-	else if (type == '2') 
+	else if (type == '2')
 	{
 		file << 0xff << '\n';
 
 		for (const Color& pixel : image.GetPixels())
 			file << (int)pixel.r << ' ';
 	}
-	else if (type == '3') 
+	else if (type == '3')
 	{
 		file << 0xff << '\n';
 

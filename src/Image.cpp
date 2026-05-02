@@ -8,21 +8,21 @@ unsigned int Image::GetHeight() const { return height; }
 std::span<Color> Image::GetPixels() { return pixels; }
 const std::span<const Color> Image::GetPixels() const { return pixels; }
 
-Color& Image::operator [] (int index) 
+Color& Image::operator [] (int index)
 {
 	assert(index >= 0 && index < (width * height));
 
 	return pixels[index];
 }
 
-const Color& Image::operator [] (int index) const 
+const Color& Image::operator [] (int index) const
 {
 	assert(index >= 0 && index < (width * height));
 
 	return pixels[index];
 }
 
-Color& Image::operator [] (int x, int y) 
+Color& Image::operator [] (int x, int y)
 {
 	assert(x >= 0 && x < width);
 	assert(y >= 0 && y < height);
@@ -30,7 +30,7 @@ Color& Image::operator [] (int x, int y)
 	return pixels[y * width + x];
 }
 
-const Color& Image::operator [] (int x, int y) const 
+const Color& Image::operator [] (int x, int y) const
 {
 	assert(x >= 0 && x < width);
 	assert(y >= 0 && y < height);
@@ -38,7 +38,7 @@ const Color& Image::operator [] (int x, int y) const
 	return pixels[y * width + x];
 }
 
-void Image::ApplyMaterial(const Material& material) 
+void Image::ApplyMaterial(const Material& material)
 {
 	auto& shader = material.GetShader();
 	auto& uniforms = material.GetUniforms();
@@ -49,7 +49,7 @@ void Image::ApplyMaterial(const Material& material)
 			pixels[y * width + x] = shaderEntryPoint(x, y, *this, uniforms);
 }
 
-void Image::ApplyMaterial(const Material& material, Image& destination) const 
+void Image::ApplyMaterial(const Material& material, Image& destination) const
 {
 	auto& shader = material.GetShader();
 	auto& uniforms = material.GetUniforms();
@@ -63,12 +63,12 @@ void Image::ApplyMaterial(const Material& material, Image& destination) const
 			destination.pixels[y * width + x] = shaderEntryPoint(x, y, *this, uniforms);
 }
 
-/*static*/ Image Image::ApplyMaterials(const Image& image, std::initializer_list<const Material> materials) 
+/*static*/ Image Image::ApplyMaterials(const Image& image, std::initializer_list<const Material> materials)
 {
 	Image source(0, 0);
 	Image destination = image;
 
-	for (const Material& material : materials) 
+	for (const Material& material : materials)
 	{
 		source = destination;
 		source.ApplyMaterial(material, destination);

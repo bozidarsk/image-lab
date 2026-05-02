@@ -7,7 +7,7 @@
 #include <initializer_list>
 #include <cassert>
 
-class Uniforms 
+class Uniforms
 {
 private:
 	std::unordered_map<std::string, std::any> data;
@@ -17,7 +17,7 @@ public:
 	void Set(const std::string& name, const T& value) { data[name] = value; }
 
 	template<typename T>
-	T Get(const std::string& name) const 
+	T Get(const std::string& name) const
 	{
 		assert(data.contains(name));
 

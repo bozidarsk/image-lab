@@ -8,7 +8,7 @@
 #include "Program.h"
 #include "EnumFlags.hpp"
 
-class Shell 
+class Shell
 {
 private:
 	std::vector<Program> programs;
@@ -21,10 +21,10 @@ public:
 	Shell(std::vector<Program>&& programs);
 	Shell(std::initializer_list<Program> programs);
 
-	class Parser 
+	class Parser
 	{
 	private:
-		struct Token 
+		struct Token
 		{
 			enum class Flags : uint8_t
 			{

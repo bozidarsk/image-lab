@@ -5,13 +5,13 @@
 #include "Shader.h"
 #include "Uniforms.h"
 
-/*static*/ Color Shader::Inverse(int x, int y, const Image& input, const Uniforms& uniforms) 
+/*static*/ Color Shader::Inverse(int x, int y, const Image& input, const Uniforms& uniforms)
 {
 	auto color = input[x, y];
 	return Color(0xff - color.r, 0xff - color.g, 0xff - color.b, color.a);
 }
 
-/*static*/ Color Shader::Grayscale(int x, int y, const Image& input, const Uniforms& uniforms) 
+/*static*/ Color Shader::Grayscale(int x, int y, const Image& input, const Uniforms& uniforms)
 {
 	auto color = input[x, y];
 	auto luminance = (uint8_t)(255.0 * (0.2125*(color.r / 255.0) + 0.7154*(color.g / 255.0) + 0.0721*(color.b / 255.0)));
@@ -19,7 +19,7 @@
 	return Color(luminance, luminance, luminance, color.a);
 }
 
-/*static*/ Color Shader::ContrastStretch(int x, int y, const Image& input, const Uniforms& uniforms) 
+/*static*/ Color Shader::ContrastStretch(int x, int y, const Image& input, const Uniforms& uniforms)
 {
 	auto color = input[x, y];
 	auto min = uniforms.Get<Color>("min");
@@ -32,7 +32,7 @@
 	return Color(r, g, b, color.a);
 }
 
-/*static*/ Color Shader::ImageKernel(int x, int y, const Image& input, const Uniforms& uniforms) 
+/*static*/ Color Shader::ImageKernel(int x, int y, const Image& input, const Uniforms& uniforms)
 {
 	if (x == 0 || y == 0 || x == input.GetWidth() - 1 || y == input.GetHeight() - 1)
 		return Color(0, 0, 0, input[x, y].a);
