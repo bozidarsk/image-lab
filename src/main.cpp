@@ -161,6 +161,7 @@ static int __strcasecmp(const char* a, const char* b)
 
 static const Material* GetMaterialByName(const std::string&	name)
 {
+	if (!__strcasecmp(name.c_str(), "Threshold")) return &Material::Threshold;
 	if (!__strcasecmp(name.c_str(), "Inverse")) return &Material::Inverse;
 	if (!__strcasecmp(name.c_str(), "Grayscale")) return &Material::Grayscale;
 	if (!__strcasecmp(name.c_str(), "ContrastStretch")) return &Material::ContrastStretch;

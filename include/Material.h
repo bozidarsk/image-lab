@@ -16,6 +16,7 @@ private:
 	Uniforms uniforms;
 
 public:
+	static const Material Threshold;
 	static const Material Inverse;
 	static const Material Grayscale;
 	static const Material ContrastStretch;

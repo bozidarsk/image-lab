@@ -11,6 +11,7 @@ private:
 	ShaderEntryPoint entryPoint;
 
 public:
+	static void Threshold(const Properties& input, Properties& output, const Uniforms& uniforms);
 	static void MinMax(const Properties& input, Properties& output, const Uniforms& uniforms);
 	static void Inverse(const Properties& input, Properties& output, const Uniforms& uniforms);
 	static void Grayscale(const Properties& input, Properties& output, const Uniforms& uniforms);

@@ -1,4 +1,13 @@
 #include "Material.h"
+#include "Color.h"
+
+/*static*/ const Material Material::Threshold = Material(
+	"Threshold",
+	{ &Shader::Threshold },
+	{
+		{ "threshold", Color::Gray }
+	}
+);
 
 /*static*/ const Material Material::Inverse = Material(
 	"Inverse",

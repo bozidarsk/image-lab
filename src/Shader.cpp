@@ -4,6 +4,14 @@
 #include "Shader.h"
 #include "Uniforms.h"
 
+/*static*/ void Shader::Threshold(const Properties& input, Properties& output, const Uniforms& uniforms)
+{
+	auto color = input.Get<Color>("color");
+	auto value = uniforms.Get<Color>("threshold");
+
+	output.Set<Color>("color", Color(((color > value) ? Color::White : Color::Black), color.a));
+}
+
 /*static*/ void Shader::MinMax(const Properties& input, Properties& output, const Uniforms& uniforms)
 {
 	auto color = input.Get<Color>("color");
