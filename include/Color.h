@@ -5,7 +5,7 @@
 
 struct Color
 {
-	uint8_t r, g, b, a;
+	float r, g, b, a;
 
 	static const Color Transparent;
 	static const Color Black;
@@ -21,5 +21,6 @@ struct Color
 	auto operator <=> (const Color& other) const = default;
 
 	Color();
-	Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 0xff);
+	Color(float r, float g, float b, float a = 1.0);
+	Color(uint32_t argb);
 };
