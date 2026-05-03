@@ -13,18 +13,18 @@
 #include "Material.h"
 #include "NetPBM.h"
 
-template<typename T>
-struct Resource
+struct LoadedMaterial
 {
-	T resource;
-	std::optional<std::string> alias = std::nullopt;
+	Material material;
+	std::optional<std::string> alias;
 };
 
 struct LoadedImage
 {
+	Image image;
 	std::string path;
-	Resource<Image> image;
-	std::vector<Resource<Material>> filters;
+	std::optional<std::string> alias;
+	std::vector<LoadedMaterial> filters;
 };
 
 static std::vector<LoadedImage> loadedImages;
@@ -130,7 +130,7 @@ static int Load(const ProgramArguments& args)
 			return 2;
 		}
 
-		loadedImages.push_back({ .path = args[0], .image = { .resource = image.value() } });
+		loadedImages.push_back({ .image = image.value(), .path = args[0] });
 	}
 	else if (args.size() == 3)
 	{
@@ -149,7 +149,7 @@ static int Load(const ProgramArguments& args)
 			return 2;
 		}
 
-		loadedImages.push_back({ .path = args[0], .image = { .resource = image.value(), .alias = args[2] } });
+		loadedImages.push_back({ .image = image.value(), .path = args[0], .alias = args[2] });
 	}
 
 	return 0;
@@ -166,7 +166,7 @@ static int AddFilter(const ProgramArguments& args)
 	}
 	else if (args.size() == 2)
 	{
-		auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.image.alias == args[0] || x.path == args[0]; });
+		auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.alias == args[0] || x.path == args[0]; });
 		if (loadedImage == loadedImages.end())
 		{
 			std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
@@ -180,7 +180,7 @@ static int AddFilter(const ProgramArguments& args)
 			return 2;
 		}
 
-		loadedImage->filters.push_back({ .resource = *filter });
+		loadedImage->filters.push_back({ .material = *filter });
 	}
 	else if (args.size() == 4)
 	{
@@ -190,7 +190,7 @@ static int AddFilter(const ProgramArguments& args)
 			return 1;
 		}
 
-		auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.image.alias == args[0] || x.path == args[0]; });
+		auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.alias == args[0] || x.path == args[0]; });
 		if (loadedImage == loadedImages.end())
 		{
 			std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
@@ -204,7 +204,7 @@ static int AddFilter(const ProgramArguments& args)
 			return 2;
 		}
 
-		loadedImage->filters.push_back({ .resource = *filter, .alias = args[3] });
+		loadedImage->filters.push_back({ .material = *filter, .alias = args[3] });
 	}
 
 	return 0;
@@ -220,14 +220,14 @@ static int RemoveFilter(const ProgramArguments& args)
 		return 1;
 	}
 
-	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.image.alias == args[0] || x.path == args[0]; });
+	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.alias == args[0] || x.path == args[0]; });
 	if (loadedImage == loadedImages.end())
 	{
 		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
 		return 2;
 	}
 
-	auto filter = std::find_if(loadedImage->filters.begin(), loadedImage->filters.end(), [&args](const Resource<Material>& x) { return x.alias == args[1] || x.resource.GetName() == args[1]; });
+	auto filter = std::find_if(loadedImage->filters.begin(), loadedImage->filters.end(), [&args](const LoadedMaterial& x) { return x.alias == args[1] || x.material.GetName() == args[1]; });
 	if (filter == loadedImage->filters.end())
 	{
 		int index;
@@ -258,7 +258,7 @@ static int ShowFilters(const ProgramArguments& args)
 		return 1;
 	}
 
-	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.image.alias == args[0] || x.path == args[0]; });
+	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.alias == args[0] || x.path == args[0]; });
 	if (loadedImage == loadedImages.end())
 	{
 		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
@@ -266,12 +266,12 @@ static int ShowFilters(const ProgramArguments& args)
 	}
 
 	std::print("Image '{}'", loadedImage->path);
-	if (loadedImage->image.alias) std::print(" (as '{}')", loadedImage->image.alias.value());
+	if (loadedImage->alias) std::print(" (as '{}')", loadedImage->alias.value());
 	std::println(":");
 
 	for (size_t i = 0; i < loadedImage->filters.size(); i++)
 	{
-		std::print("[{}]: '{}'", i, loadedImage->filters[i].resource.GetName());
+		std::print("[{}]: '{}'", i, loadedImage->filters[i].material.GetName());
 		if (loadedImage->filters[i].alias) std::print(" (as '{}')", loadedImage->filters[i].alias.value());
 		std::println();
 	}
@@ -304,7 +304,7 @@ static int Run(const ProgramArguments& args)
 		return 1;
 	}
 
-	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.image.alias == args[0] || x.path == args[0]; });
+	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.alias == args[0] || x.path == args[0]; });
 	if (loadedImage == loadedImages.end())
 	{
 		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
@@ -312,26 +312,26 @@ static int Run(const ProgramArguments& args)
 	}
 
 	Image source(0, 0);
-	Image destination = loadedImage->image.resource;
+	Image destination = loadedImage->image;
 
 	std::print("Running filters for image '{}'", loadedImage->path);
-	if (loadedImage->image.alias) std::print(" (as '{}')", loadedImage->image.alias.value());
+	if (loadedImage->alias) std::print(" (as '{}')", loadedImage->alias.value());
 	std::println(":");
 
 	for (size_t i = 0; i < loadedImage->filters.size(); i++)
 	{
 		std::print("Filter: ");
-		std::print("[{}]: '{}'", i, loadedImage->filters[i].resource.GetName());
+		std::print("[{}]: '{}'", i, loadedImage->filters[i].material.GetName());
 		if (loadedImage->filters[i].alias) std::print(" (as '{}')", loadedImage->filters[i].alias.value());
 		std::println();
 
 		source = destination;
-		source.ApplyMaterial(loadedImage->filters[i].resource, destination);
+		source.ApplyMaterial(loadedImage->filters[i].material, destination);
 
 		std::println("Done");
 	}
 
-	loadedImage->image.resource = std::move(destination);
+	loadedImage->image = std::move(destination);
 
 	return 0;
  }
@@ -361,7 +361,7 @@ static int Save(const ProgramArguments& args)
 		return 1;
 	}
 
-	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.image.alias == args[0] || x.path == args[0]; });
+	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.alias == args[0] || x.path == args[0]; });
 	if (loadedImage == loadedImages.end())
 	{
 		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
@@ -371,10 +371,10 @@ static int Save(const ProgramArguments& args)
 	std::string path = (args.size() == 1) ? loadedImage->path : args[1];
 
 	std::print("Saving image '{}'", args[0]);
-	if (loadedImage->image.alias) std::print(" (as '{}')", loadedImage->image.alias.value());
+	if (loadedImage->alias) std::print(" (as '{}')", loadedImage->alias.value());
 	std::println(" to '{}'.", path);
 
-	NetPBM::Save(path, loadedImage->image.resource);
+	NetPBM::Save(path, loadedImage->image);
 	std::println("Done.");
 
 	return 0;
