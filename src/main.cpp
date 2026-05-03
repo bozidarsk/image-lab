@@ -358,7 +358,7 @@ static int ShowFilters(const ProgramArguments& args)
 			else if (property.second.type() == typeid(float))
 				std::print(" {}={}", property.first, std::any_cast<float>(property.second));
 			else if (property.second.type() == typeid(Color))
-				std::print(" {}=#{:06x}", property.first, (uint32_t)std::any_cast<Color>(property.second));
+				std::print(" {}=#{:08x}", property.first, (uint32_t)std::any_cast<Color>(property.second));
 		}
 
 		std::println();
