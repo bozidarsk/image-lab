@@ -63,7 +63,7 @@ void Image::ApplyMaterial(const Material& material, Image& destination) const
 				input.Set<int>("x", x);
 
 				shader(input, output, uniforms);
-				destination[y * width + x] = output.Has<Color>("color") ? output.Get<Color>("color") : Color(0, 0, 0);
+				destination[y * width + x] = output.Has<Color>("color") ? output.Get<Color>("color") : Color::Black;
 			}
 		}
 

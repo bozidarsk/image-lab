@@ -7,6 +7,17 @@ struct Color
 {
 	uint8_t r, g, b, a;
 
+	static const Color Transparent;
+	static const Color Black;
+	static const Color White;
+	static const Color Gray;
+	static const Color Red;
+	static const Color Green;
+	static const Color Blue;
+	static const Color Yellow;
+	static const Color Cyan;
+	static const Color Magenta;
+
 	auto operator <=> (const Color& other) const = default;
 
 	Color();
