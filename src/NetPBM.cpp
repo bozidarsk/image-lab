@@ -39,7 +39,7 @@
 			if (auto value = ReadNext<char>(type, file)) x = (*value == '0') ? 0xff : 0x00;
 			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-			pixels.emplace_back(x, x, x);
+			pixels.emplace_back(x / 255.0, x / 255.0, x / 255.0);
 		}
 	}
 	else if (type == '2' || type == '5')
@@ -65,7 +65,7 @@
 			if (auto value = ReadNext<uint16_t>(type, file)) x = (uint8_t)(255.0 * ((float)(*value) / (float)max));
 			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-			pixels.emplace_back(x, x, x);
+			pixels.emplace_back(x / 255.0, x / 255.0, x / 255.0);
 		}
 	}
 	else if (type == '3' || type == '6')
@@ -97,7 +97,7 @@
 			if (auto value = ReadNext<uint16_t>(type, file)) b = (uint8_t)(255.0 * ((float)(*value) / (float)max));
 			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-			pixels.emplace_back(r, g, b);
+			pixels.emplace_back(r / 255.0, g / 255.0, b / 255.0);
 		}
 	}
 
@@ -115,7 +115,7 @@
 
 	for (const Color& pixel : image.GetPixels())
 	{
-		if (type == '1' && (pixel.r != pixel.g || pixel.g != pixel.b || (pixel.r != 0x00 && pixel.r != 0xff) || (pixel.g != 0x00 && pixel.g != 0xff) || (pixel.b != 0x00 && pixel.b != 0xff)))
+		if (type == '1' && (pixel.r != pixel.g || pixel.g != pixel.b || (pixel.r != 0.0 && pixel.r != 1.0) || (pixel.g != 0.0 && pixel.g != 1.0) || (pixel.b != 0.0 && pixel.b != 1.0)))
 			type = '2';
 
 		if (type == '2' && (pixel.r != pixel.g || pixel.g != pixel.b))
@@ -131,21 +131,21 @@
 	if (type == '1')
 	{
 		for (const Color& pixel : image.GetPixels())
-			file << ((pixel.r == 0xff) ? '0' : '1') << ' ';
+			file << ((pixel.r == 1.0) ? '0' : '1') << ' ';
 	}
 	else if (type == '2')
 	{
 		file << 0xff << '\n';
 
 		for (const Color& pixel : image.GetPixels())
-			file << (int)pixel.r << ' ';
+			file << (int)(pixel.r * 255.0) << ' ';
 	}
 	else if (type == '3')
 	{
 		file << 0xff << '\n';
 
 		for (const Color& pixel : image.GetPixels())
-			file << (int)pixel.r << ' ' << (int)pixel.g << ' ' << (int)pixel.b << ' ';
+			file << (int)(pixel.r * 255.0) << ' ' << (int)(pixel.g * 255.0) << ' ' << (int)(pixel.b * 255.0) << ' ';
 	}
 
 	file << '\n';
