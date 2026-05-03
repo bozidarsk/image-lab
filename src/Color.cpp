@@ -21,7 +21,7 @@ void Color::Clamp()
 	a = std::clamp(a, 0.0f, 1.0f);
 }
 
-float Color::Luminance() const { return 0.2125*r + 0.7154*g + 0.0721*b; }
+float Color::Luminance() const { return 0.2125f*r + 0.7154f*g + 0.0721f*b; }
 
 Color& Color::operator *= (float x) { r *= x; g *= x; b *= x; a *= x; return *this; }
 Color& Color::operator /= (float x) { r /= x; g /= x; b /= x; a /= x; return *this; }
@@ -35,9 +35,9 @@ Color operator * (float x, const Color& color) { return Color(color.r * x, color
 Color operator / (const Color& color, float x) { return Color(color.r / x, color.g / x, color.b / x, color.a / x); }
 Color operator / (float x, const Color& color) { return Color(color.r / x, color.g / x, color.b / x, color.a / x); }
 
-Color::operator uint32_t () const { return (((uint32_t)(a * 255.0) & 0xff) << 24) | (((uint32_t)(b * 255.0) & 0xff) << 16) | (((uint32_t)(g * 255.0) & 0xff) << 8) | (((uint32_t)(r * 255.0) & 0xff) << 0); }
+Color::operator uint32_t () const { return (((uint32_t)(a * 255.0f) & 0xff) << 24) | (((uint32_t)(b * 255.0f) & 0xff) << 16) | (((uint32_t)(g * 255.0f) & 0xff) << 8) | (((uint32_t)(r * 255.0f) & 0xff) << 0); }
 
-Color::Color() : Color(0, 0, 0, 0) {}
+Color::Color() : Color(0.0f, 0.0f, 0.0f, 0.0f) {}
 Color::Color(const Color& x, float a) : Color(x.r, x.g, x.b, a) {}
 Color::Color(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {}
-Color::Color(uint32_t abgr) : r(((abgr >> 0) & 0xff) / 255.0), g(((abgr >> 8) & 0xff) / 255.0), b(((abgr >> 16) & 0xff) / 255.0), a(((abgr >> 24) & 0xff) / 255.0) {}
+Color::Color(uint32_t abgr) : r(((abgr >> 0) & 0xff) / 255.0f), g(((abgr >> 8) & 0xff) / 255.0f), b(((abgr >> 16) & 0xff) / 255.0f), a(((abgr >> 24) & 0xff) / 255.0f) {}

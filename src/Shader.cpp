@@ -22,7 +22,7 @@
 	auto& image = *input.Get<const Image*>("image");
 
 	auto color = image[x, y];
-	output.Set<Color>("color", Color(1 - color.r, 1 - color.g, 1 - color.b, color.a));
+	output.Set<Color>("color", Color(1.0f - color.r, 1.0f - color.g, 1.0f - color.b, color.a));
 }
 
 /*static*/ void Shader::Grayscale(const Properties& input, Properties& output, const Uniforms& uniforms)
@@ -82,15 +82,15 @@
 	auto bottom_right = image[x + 1, y + 1];
 
 	auto color =
-		top_left*uniforms.Get<double>("m00")
-		+ top_center*uniforms.Get<double>("m01")
-		+ top_right*uniforms.Get<double>("m02")
-		+ middle_left*uniforms.Get<double>("m10")
-		+ middle_center*uniforms.Get<double>("m11")
-		+ middle_right*uniforms.Get<double>("m12")
-		+ bottom_left*uniforms.Get<double>("m20")
-		+ bottom_center*uniforms.Get<double>("m21")
-		+ bottom_right*uniforms.Get<double>("m22")
+		top_left*uniforms.Get<float>("m00")
+		+ top_center*uniforms.Get<float>("m01")
+		+ top_right*uniforms.Get<float>("m02")
+		+ middle_left*uniforms.Get<float>("m10")
+		+ middle_center*uniforms.Get<float>("m11")
+		+ middle_right*uniforms.Get<float>("m12")
+		+ bottom_left*uniforms.Get<float>("m20")
+		+ bottom_center*uniforms.Get<float>("m21")
+		+ bottom_right*uniforms.Get<float>("m22")
 	;
 
 	color.Clamp();

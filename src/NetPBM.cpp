@@ -39,7 +39,7 @@
 			if (auto value = ReadNext<char>(type, file)) x = (*value == '0') ? 0xff : 0x00;
 			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-			pixels.emplace_back(x / 255.0, x / 255.0, x / 255.0);
+			pixels.emplace_back(x / 255.0f, x / 255.0f, x / 255.0f);
 		}
 	}
 	else if (type == '2' || type == '5')
@@ -62,10 +62,10 @@
 		{
 			uint8_t x;
 
-			if (auto value = ReadNext<uint16_t>(type, file)) x = (uint8_t)(255.0 * ((float)(*value) / (float)max));
+			if (auto value = ReadNext<uint16_t>(type, file)) x = (uint8_t)(255.0f * ((float)(*value) / (float)max));
 			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-			pixels.emplace_back(x / 255.0, x / 255.0, x / 255.0);
+			pixels.emplace_back(x / 255.0f, x / 255.0f, x / 255.0f);
 		}
 	}
 	else if (type == '3' || type == '6')
@@ -88,16 +88,16 @@
 		{
 			uint8_t r, g, b;
 
-			if (auto value = ReadNext<uint16_t>(type, file)) r = (uint8_t)(255.0 * ((float)(*value) / (float)max));
+			if (auto value = ReadNext<uint16_t>(type, file)) r = (uint8_t)(255.0f * ((float)(*value) / (float)max));
 			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-			if (auto value = ReadNext<uint16_t>(type, file)) g = (uint8_t)(255.0 * ((float)(*value) / (float)max));
+			if (auto value = ReadNext<uint16_t>(type, file)) g = (uint8_t)(255.0f * ((float)(*value) / (float)max));
 			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-			if (auto value = ReadNext<uint16_t>(type, file)) b = (uint8_t)(255.0 * ((float)(*value) / (float)max));
+			if (auto value = ReadNext<uint16_t>(type, file)) b = (uint8_t)(255.0f * ((float)(*value) / (float)max));
 			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-			pixels.emplace_back(r / 255.0, g / 255.0, b / 255.0);
+			pixels.emplace_back(r / 255.0f, g / 255.0f, b / 255.0f);
 		}
 	}
 
@@ -115,7 +115,7 @@
 
 	for (const Color& pixel : image.GetPixels())
 	{
-		if (type == '1' && (pixel.r != pixel.g || pixel.g != pixel.b || (pixel.r != 0.0 && pixel.r != 1.0) || (pixel.g != 0.0 && pixel.g != 1.0) || (pixel.b != 0.0 && pixel.b != 1.0)))
+		if (type == '1' && (pixel.r != pixel.g || pixel.g != pixel.b || (pixel.r != 0.0f && pixel.r != 1.0f) || (pixel.g != 0.0f && pixel.g != 1.0f) || (pixel.b != 0.0f && pixel.b != 1.0f)))
 			type = '2';
 
 		if (type == '2' && (pixel.r != pixel.g || pixel.g != pixel.b))
@@ -131,21 +131,21 @@
 	if (type == '1')
 	{
 		for (const Color& pixel : image.GetPixels())
-			file << ((pixel.r == 1.0) ? '0' : '1') << ' ';
+			file << ((pixel.r == 1.0f) ? '0' : '1') << ' ';
 	}
 	else if (type == '2')
 	{
 		file << 0xff << '\n';
 
 		for (const Color& pixel : image.GetPixels())
-			file << (int)(pixel.r * 255.0) << ' ';
+			file << (int)(pixel.r * 255.0f) << ' ';
 	}
 	else if (type == '3')
 	{
 		file << 0xff << '\n';
 
 		for (const Color& pixel : image.GetPixels())
-			file << (int)(pixel.r * 255.0) << ' ' << (int)(pixel.g * 255.0) << ' ' << (int)(pixel.b * 255.0) << ' ';
+			file << (int)(pixel.r * 255.0f) << ' ' << (int)(pixel.g * 255.0f) << ' ' << (int)(pixel.b * 255.0f) << ' ';
 	}
 
 	file << '\n';

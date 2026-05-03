@@ -34,7 +34,7 @@ struct Color
 
 	Color();
 	Color(const Color& x, float a);
-	Color(float r, float g, float b, float a = 1.0);
+	Color(float r, float g, float b, float a = 1.0f);
 	explicit Color(uint32_t argb);
 };
 
