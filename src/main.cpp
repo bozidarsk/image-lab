@@ -18,6 +18,8 @@ struct LoadedMaterial
 {
 	Material material;
 	std::optional<std::string> alias;
+
+	LoadedMaterial(const Material& material, const std::optional<std::string>& alias) : material(material), alias(alias) {}
 };
 
 struct LoadedImage
@@ -26,6 +28,8 @@ struct LoadedImage
 	std::string path;
 	std::optional<std::string> alias;
 	std::vector<LoadedMaterial> filters;
+
+	LoadedImage(Image&& image, const std::string& path, const std::optional<std::string>& alias) : image(std::move(image)), path(path), alias(alias) {}
 };
 
 static std::vector<LoadedImage> loadedImages;
@@ -211,7 +215,7 @@ static int Load(const ProgramArguments& args)
 			return 2;
 		}
 
-		loadedImages.push_back({ .image = image.value(), .path = args[0] });
+		loadedImages.emplace_back(std::move(image.value()), args[0], std::nullopt);
 	}
 	else if (args.size() == 3)
 	{
@@ -230,7 +234,7 @@ static int Load(const ProgramArguments& args)
 			return 2;
 		}
 
-		loadedImages.push_back({ .image = image.value(), .path = args[0], .alias = args[2] });
+		loadedImages.emplace_back(std::move(image.value()), args[0], args[2]);
 	}
 
 	return 0;
@@ -272,7 +276,7 @@ static int AddFilter(const ProgramArguments& args)
 		alias = args[3];
 	}
 
-	loadedImage->filters.push_back({ .material = *filter, .alias = alias });
+	loadedImage->filters.emplace_back(*filter, alias);
 
 	for (size_t i = alias ? 4 : 2; i < args.size(); i++)
 	{
