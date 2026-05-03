@@ -42,6 +42,11 @@ public:
 		return std::any_cast<T>(value);
 	}
 
+	std::unordered_map<std::string, std::any>::iterator begin();
+	std::unordered_map<std::string, std::any>::iterator end();
+	std::unordered_map<std::string, std::any>::const_iterator cbegin() const;
+	std::unordered_map<std::string, std::any>::const_iterator cend() const;
+
 	Properties();
 	Properties(std::initializer_list<std::pair<const std::string, std::any>> data);
 };

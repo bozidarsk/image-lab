@@ -6,6 +6,7 @@
 #include <iostream>
 #include <algorithm>
 #include <initializer_list>
+#include <cmath>
 #include <cstring>
 
 #include "Shell.h"
@@ -29,26 +30,106 @@ struct LoadedImage
 
 static std::vector<LoadedImage> loadedImages;
 
-static bool TryParse(const std::string& str, int* result)
+static bool TryParse(const char* str, int* result)
 {
-	if (!result)
+	if (!str || !result)
 		return false;
 
-	bool isNegative = str[0] == '-';
-	*result = 0;
+	bool isNegative = *str == '-';
 
-	for (int i = (isNegative || str[0] == '+') ? 1 : 0; i < str.length(); i++)
+	if (*str == '+' || *str == '-')
+		str++;
+
+	if (*str == 0)
+		return false;
+
+	for (*result = 0; *str; str++)
 	{
-		if (str[i] < '0' || str[i] > '9')
+		if (*str < '0' || *str > '9')
 			return false;
 
 		*result *= 10;
-		*result += str[i] - '0';
+		*result += *str - '0';
 	}
 
 	if (isNegative)
 		*result = -(*result);
 
+	return true;
+}
+
+static bool TryParse(const char* str, float* result)
+{
+	if (!str || !result)
+		return false;
+
+	std::string integerString = "";
+	std::string fractionString = "";
+	std::string exponentString = "";
+
+	while (*str && *str != '.' && *str != 'e')
+	{
+		integerString += *str;
+		str++;
+	}
+
+	if (*str == '.')
+		for (str++; *str && *str != 'e'; str++)
+			fractionString += *str;
+
+	if (*str == 'e')
+		for (str++; *str; str++)
+			exponentString += *str;
+
+	int integer, fraction, exponent;
+
+	if (!integerString.empty() && !TryParse(integerString.c_str(), &integer)) return false;
+	if (!fractionString.empty() && !TryParse(fractionString.c_str(), &fraction)) return false;
+	if (!exponentString.empty() && !TryParse(exponentString.c_str(), &exponent)) return false;
+
+	if (integerString.empty() && fractionString.empty())
+		return  false;;
+
+	*result = !integerString.empty() ? (float)integer : 0.0f;
+
+	if (!fractionString.empty())
+		*result += (float)fraction / std::pow(10.0f, fractionString.length());
+
+	if (!exponentString.empty())
+		*result *= std::pow(10.0f, (float)exponent);
+
+	return true;
+}
+
+static bool TryParse(const char* str, Color* result)
+{
+	if (!str || !str)
+		return false;
+
+	if (!str[0])
+		return false;
+
+	if (str[0] == '#') str++;
+	if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) str += 2;
+
+	uint32_t color = 0;
+	int length = 0;
+
+	for (int i = 0; str[i]; i++)
+	{
+		color <<= 4;
+		length++;
+
+		if (str[i] >= '0' && str[i] <= '9') color |= str[i] - '0';
+		else if (str[i] >= 'a' && str[i] <= 'f') color |= (str[i] - 'a') + 0xa;
+		else if (str[i] >= 'A' && str[i] <= 'F') color |= (str[i] - 'A') + 0xa;
+		else return false;
+	}
+
+	if (length != 6 && length != 8)
+		return false;
+
+	*result = Color(color);
 	return true;
 }
 
@@ -98,7 +179,7 @@ static int Help(const ProgramArguments& args)
 	std::println("cd [dir] - changes the working directory");
 	std::println("ls [dir] - list directory contents");
 	std::println("load <path> [as <alias>] - loads an image file with an optional name/alias");
-	std::println("add-filter <image> <filter> [as <alias>] - adds a filter with an optional name/alias to be applied to the image");
+	std::println("add-filter <image> <filter> [as <alias>] [property=value ...] - adds a filter with an optional name/alias to be applied to the image");
 	std::println("remove-filter <image> {{<filter>|<filter-index>}} - removes the specified filter from an image");
 	std::println("show-filters <image> - shows all filters that will be applied to the image");
 	std::println("show-all-filters - shows all loaded images with all of their filters");
@@ -157,54 +238,67 @@ static int Load(const ProgramArguments& args)
 
 static int AddFilter(const ProgramArguments& args)
 {
-	// add-filter <image> <filter> [as <alias>]
+	// add-filter <image> <filter> [as <alias>] [property=value ...]
 
-	if (args.size() != 2 && args.size() != 4)
+	if (args.size() < 2)
 	{
 		std::println(stderr, "Invalid arguments.");
 		return 1;
 	}
-	else if (args.size() == 2)
+
+	auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.alias == args[0] || x.path == args[0]; });
+	if (loadedImage == loadedImages.end())
 	{
-		auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.alias == args[0] || x.path == args[0]; });
-		if (loadedImage == loadedImages.end())
-		{
-			std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
-			return 2;
-		}
-
-		auto filter = GetMaterialByName(args[1]);
-		if (!filter)
-		{
-			std::println(stderr, "Cannot find filter '{}'.", args[1]);
-			return 2;
-		}
-
-		loadedImage->filters.push_back({ .material = *filter });
+		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
+		return 2;
 	}
-	else if (args.size() == 4)
+
+	auto filter = GetMaterialByName(args[1]);
+	if (!filter)
 	{
-		if (args[2] != "as")
+		std::println(stderr, "Cannot find filter '{}'.", args[1]);
+		return 2;
+	}
+
+	std::optional<std::string> alias = std::nullopt;
+	if (args.size() >= 3 && args[2] == "as")
+	{
+		if (args.size() < 4)
 		{
 			std::println(stderr, "Invalid arguments.");
 			return 1;
 		}
 
-		auto loadedImage = std::find_if(loadedImages.begin(), loadedImages.end(), [&args](const LoadedImage& x) { return x.alias == args[0] || x.path == args[0]; });
-		if (loadedImage == loadedImages.end())
+		alias = args[3];
+	}
+
+	loadedImage->filters.push_back({ .material = *filter, .alias = alias });
+
+	for (size_t i = alias ? 4 : 2; i < args.size(); i++)
+	{
+		auto delim = std::find(args[i].begin(), args[i].end(), '=');
+
+		if (delim == args[i].end())
 		{
-			std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
-			return 2;
+			std::println(stderr, "Filter property '{}' must be in the 'name=value' format.", args[i]);
+			return 1;
 		}
 
-		auto filter = GetMaterialByName(args[1]);
-		if (!filter)
+		std::string name(args[i].begin(), delim);
+		std::string value(delim + 1, args[i].end());
+
+		int _int;
+		float _float;
+		Color _Color;
+
+		if (TryParse(value.c_str(), &_int)) loadedImage->filters.back().material.GetUniforms().Set<int>(name, _int);
+		else if (TryParse(value.c_str(), &_float)) loadedImage->filters.back().material.GetUniforms().Set<float>(name, _float);
+		else if (TryParse(value.c_str(), &_Color)) loadedImage->filters.back().material.GetUniforms().Set<Color>(name, _Color);
+		else
 		{
-			std::println(stderr, "Cannot find filter '{}'.", args[1]);
+			std::println(stderr, "Cannot parse value '{}' of property '{}'.", value, name);
 			return 2;
 		}
-
-		loadedImage->filters.push_back({ .material = *filter, .alias = args[3] });
 	}
 
 	return 0;
@@ -231,7 +325,7 @@ static int RemoveFilter(const ProgramArguments& args)
 	if (filter == loadedImage->filters.end())
 	{
 		int index;
-		if (TryParse(args[1], &index))
+		if (TryParse(args[1].c_str(), &index))
 		{
 			if (index < 0)
 				index = loadedImage->filters.size() + index;
@@ -273,6 +367,17 @@ static int ShowFilters(const ProgramArguments& args)
 	{
 		std::print("[{}]: '{}'", i, loadedImage->filters[i].material.GetName());
 		if (loadedImage->filters[i].alias) std::print(" (as '{}')", loadedImage->filters[i].alias.value());
+
+		for (const auto& property : loadedImage->filters[i].material.GetUniforms())
+		{
+			if (property.second.type() == typeid(int))
+				std::print(" {}={}", property.first, std::any_cast<int>(property.second));
+			else if (property.second.type() == typeid(float))
+				std::print(" {}={}", property.first, std::any_cast<float>(property.second));
+			else if (property.second.type() == typeid(Color))
+				std::print(" {}=#{:06x}", property.first, (uint32_t)std::any_cast<Color>(property.second));
+		}
+
 		std::println();
 	}
 
