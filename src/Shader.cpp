@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <cassert>
 
 #include "Image.h"
@@ -34,7 +33,7 @@
 	auto& image = *input.Get<const Image*>("image");
 
 	auto color = image[x, y];
-	auto luminance = 0.2125*color.r + 0.7154*color.g + 0.0721*color.b;
+	auto luminance = color.Luminance();
 
 	output.Set<Color>("color", Color(luminance, luminance, luminance, color.a));
 }
@@ -66,7 +65,7 @@
 
 	if (x == 0 || y == 0 || x == image.GetWidth() - 1 || y == image.GetHeight() - 1)
 	{
-		output.Set<Color>("color", Color(0, 0, 0, image[x, y].a));
+		output.Set<Color>("color", Color(Color::Black, image[x, y].a));
 		return;
 	}
 
@@ -82,47 +81,22 @@
 	auto bottom_center = image[x, y + 1];
 	auto bottom_right = image[x + 1, y + 1];
 
-	output.Set<Color>("color",
-		Color(
-			std::clamp(
-				top_left.r*uniforms.Get<double>("m00")
-				+ top_center.r*uniforms.Get<double>("m01")
-				+ top_right.r*uniforms.Get<double>("m02")
-				+ middle_left.r*uniforms.Get<double>("m10")
-				+ middle_center.r*uniforms.Get<double>("m11")
-				+ middle_right.r*uniforms.Get<double>("m12")
-				+ bottom_left.r*uniforms.Get<double>("m20")
-				+ bottom_center.r*uniforms.Get<double>("m21")
-				+ bottom_right.r*uniforms.Get<double>("m22"),
-				0.0, 1.0
-			),
-			std::clamp(
-				top_left.g*uniforms.Get<double>("m00")
-				+ top_center.g*uniforms.Get<double>("m01")
-				+ top_right.g*uniforms.Get<double>("m02")
-				+ middle_left.g*uniforms.Get<double>("m10")
-				+ middle_center.g*uniforms.Get<double>("m11")
-				+ middle_right.g*uniforms.Get<double>("m12")
-				+ bottom_left.g*uniforms.Get<double>("m20")
-				+ bottom_center.g*uniforms.Get<double>("m21")
-				+ bottom_right.g*uniforms.Get<double>("m22"),
-				0.0, 1.0
-			),
-			std::clamp(
-				top_left.b*uniforms.Get<double>("m00")
-				+ top_center.b*uniforms.Get<double>("m01")
-				+ top_right.b*uniforms.Get<double>("m02")
-				+ middle_left.b*uniforms.Get<double>("m10")
-				+ middle_center.b*uniforms.Get<double>("m11")
-				+ middle_right.b*uniforms.Get<double>("m12")
-				+ bottom_left.b*uniforms.Get<double>("m20")
-				+ bottom_center.b*uniforms.Get<double>("m21")
-				+ bottom_right.b*uniforms.Get<double>("m22"),
-				0.0, 1.0
-			),
-			middle_center.a
-		)
-	);
+	auto color =
+		top_left*uniforms.Get<double>("m00")
+		+ top_center*uniforms.Get<double>("m01")
+		+ top_right*uniforms.Get<double>("m02")
+		+ middle_left*uniforms.Get<double>("m10")
+		+ middle_center*uniforms.Get<double>("m11")
+		+ middle_right*uniforms.Get<double>("m12")
+		+ bottom_left*uniforms.Get<double>("m20")
+		+ bottom_center*uniforms.Get<double>("m21")
+		+ bottom_right*uniforms.Get<double>("m22")
+	;
+
+	color.Clamp();
+	color.a = middle_center.a;
+
+	output.Set<Color>("color", color);
 }
 
 void Shader::operator () (const Properties& input, Properties& output, const Uniforms& uniforms) const

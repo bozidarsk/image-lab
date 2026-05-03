@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "Color.h"
 
 /*static*/ const Color Color::Transparent = Color(0x00000000);
@@ -11,6 +13,31 @@
 /*static*/ const Color Color::Cyan        = Color(0xffffff00);
 /*static*/ const Color Color::Magenta     = Color(0xffff00ff);
 
+void Color::Clamp()
+{
+	r = std::clamp(r, 0.0f, 1.0f);
+	g = std::clamp(g, 0.0f, 1.0f);
+	b = std::clamp(b, 0.0f, 1.0f);
+	a = std::clamp(a, 0.0f, 1.0f);
+}
+
+float Color::Luminance() const { return 0.2125*r + 0.7154*g + 0.0721*b; }
+
+Color& Color::operator *= (float x) { r *= x; g *= x; b *= x; a *= x; return *this; }
+Color& Color::operator /= (float x) { r /= x; g /= x; b /= x; a /= x; return *this; }
+Color& Color::operator += (const Color& x) { r += x.r; g += x.g; b += x.g; a += x.a; return *this; }
+Color& Color::operator -= (const Color& x) { r -= x.r; g -= x.g; b -= x.g; a -= x.a; return *this; }
+Color Color::operator + (const Color& x) const { return Color(r + x.r, g + x.g, b + x.g, a + x.a); }
+Color Color::operator - (const Color& x) const { return Color(r - x.r, g - x.g, b - x.g, a - x.a); }
+
+Color operator * (const Color& color, float x) { return Color(color.r * x, color.g * x, color.b * x, color.a * x); }
+Color operator * (float x, const Color& color) { return Color(color.r * x, color.g * x, color.b * x, color.a * x); }
+Color operator / (const Color& color, float x) { return Color(color.r / x, color.g / x, color.b / x, color.a / x); }
+Color operator / (float x, const Color& color) { return Color(color.r / x, color.g / x, color.b / x, color.a / x); }
+
+Color::operator uint32_t () const { return (((uint32_t)(a * 255.0) & 0xff) << 24) | (((uint32_t)(b * 255.0) & 0xff) << 16) | (((uint32_t)(g * 255.0) & 0xff) << 8) | (((uint32_t)(r * 255.0) & 0xff) << 0); }
+
 Color::Color() : Color(0, 0, 0, 0) {}
+Color::Color(const Color& x, float a) : Color(x.r, x.g, x.b, a) {}
 Color::Color(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {}
 Color::Color(uint32_t abgr) : r(((abgr >> 0) & 0xff) / 255.0), g(((abgr >> 8) & 0xff) / 255.0), b(((abgr >> 16) & 0xff) / 255.0), a(((abgr >> 24) & 0xff) / 255.0) {}
