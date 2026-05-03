@@ -133,6 +133,9 @@ static bool TryParse(const char* str, Color* result)
 	if (length != 6 && length != 8)
 		return false;
 
+	if (length == 6)
+		color |= 0xff000000;
+
 	*result = Color(color);
 	return true;
 }
