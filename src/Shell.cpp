@@ -1,26 +1,27 @@
-#include <print>
+#include <expected>
+#include <format>
 #include <algorithm>
 
 #include "Shell.h"
 
-int Shell::Run(const std::string& command) const
+std::expected<int, std::string> Shell::Run(const std::string& command) const
 {
-	auto values = Parser::Parse(command);
+	std::vector<std::string> values;
+
+	if(!Parser::TryParse(command, &values))
+		return std::unexpected("Syntax error.");
 
 	return (values.size() > 0) ? Run(values[0], ProgramArguments(values.begin() + 1, values.end())) : 0;
 }
 
-int Shell::Run(const std::string& name, const ProgramArguments& args) const
+std::expected<int, std::string> Shell::Run(const std::string& name, const ProgramArguments& args) const
 {
 	const auto program = std::find_if(programs.begin(), programs.end(), [&name](const Program& x) { return x.GetName() == name; });
 
 	if (program != programs.end())
 		return program->Run(args);
 	else
-	{
-		std::println(stderr, "Shell::Run - Unknown program '{}'.", name);
-		return -1;
-	}
+		return std::unexpected(std::format("Unknown program '{}'.", name));
 }
 
 Shell::Shell(const std::vector<Program>& programs) : programs(programs) {}

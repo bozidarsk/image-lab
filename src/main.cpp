@@ -502,8 +502,13 @@ int main(int argc, char** argv)
 	while (true)
 	{
 		std::print("{}", prompt);
-
 		std::getline(std::cin, input);
-		shell.Run(input);
+
+		auto code = shell.Run(input);
+		if (!code)
+		{
+			std::println(stderr, "Failed to run program.");
+			std::println(stderr, "{}", code.error());
+		}
 	}
 }

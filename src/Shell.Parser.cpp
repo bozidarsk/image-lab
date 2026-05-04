@@ -155,7 +155,7 @@
 	return tokens;
 }
 
-/*static*/ std::vector<std::string> Shell::Parser::Parse(const std::string& command)
+/*static*/ bool Shell::Parser::TryParse(const std::string& command, std::vector<std::string>* values)
 {
 	std::vector<Token> tokens = Tokenize(command);
 
@@ -199,5 +199,6 @@
 	if (!chunk.empty())
 		chunks.emplace_back(chunk.begin(), chunk.end());
 
-	return chunks;
+	*values = std::move(chunks);
+	return true;
 }

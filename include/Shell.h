@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <expected>
 #include <initializer_list>
 #include <cstdint>
 
@@ -14,8 +15,8 @@ private:
 	std::vector<Program> programs;
 
 public:
-	int Run(const std::string& command) const;
-	int Run(const std::string& name, const ProgramArguments& args) const;
+	std::expected<int, std::string> Run(const std::string& command) const;
+	std::expected<int, std::string> Run(const std::string& name, const ProgramArguments& args) const;
 
 	Shell(const std::vector<Program>& programs);
 	Shell(std::vector<Program>&& programs);
@@ -47,6 +48,6 @@ public:
 		static void ProcessEnvironmentVariables(std::vector<Token>& tokens);
 
 	public:
-		static std::vector<std::string> Parse(const std::string& command);
+		static bool TryParse(const std::string& command, std::vector<std::string>* values);
 	};
 };

@@ -23,10 +23,10 @@
 
 	if (type == '1' || type == '4')
 	{
-		if (auto value = ReadNext<unsigned int>(type, file)) width = *value;
+		if (TryReadNext<unsigned int>(type, file, &width));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-		if (auto value = ReadNext<unsigned int>(type, file)) height = *value;
+		if (TryReadNext<unsigned int>(type, file, &height));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 		unsigned int count = width * height;
@@ -34,9 +34,9 @@
 
 		for (unsigned int i = 0; i < count; i++)
 		{
-			uint8_t x;
+			char x;
 
-			if (auto value = ReadNext<char>(type, file)) x = (*value == '0') ? 0xff : 0x00;
+			if (TryReadNext<char>(type, file, &x)) x = (x == '0') ? 0xff : 0x00;
 			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 			pixels.emplace_back(x / 255.0f, x / 255.0f, x / 255.0f);
@@ -44,10 +44,10 @@
 	}
 	else if (type == '2' || type == '5')
 	{
-		if (auto value = ReadNext<unsigned int>(type, file)) width = *value;
+		if (TryReadNext<unsigned int>(type, file, &width));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-		if (auto value = ReadNext<unsigned int>(type, file)) height = *value;
+		if (TryReadNext<unsigned int>(type, file, &height));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 		unsigned int count = width * height;
@@ -55,14 +55,14 @@
 
 		uint16_t max;
 
-		if (auto value = ReadNext<uint16_t>(type, file)) max = *value;
+		if (TryReadNext<uint16_t>(type, file, &max));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 		for (unsigned int i = 0; i < count; i++)
 		{
-			uint8_t x;
+			uint16_t x;
 
-			if (auto value = ReadNext<uint16_t>(type, file)) x = (uint8_t)(255.0f * ((float)(*value) / (float)max));
+			if (TryReadNext<uint16_t>(type, file, &x)) x = (uint16_t)(255.0f * ((float)x / (float)max));
 			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 			pixels.emplace_back(x / 255.0f, x / 255.0f, x / 255.0f);
@@ -70,10 +70,10 @@
 	}
 	else if (type == '3' || type == '6')
 	{
-		if (auto value = ReadNext<unsigned int>(type, file)) width = *value;
+		if (TryReadNext<unsigned int>(type, file, &width));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-		if (auto value = ReadNext<unsigned int>(type, file)) height = *value;
+		if (TryReadNext<unsigned int>(type, file, &height));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 		unsigned int count = width * height;
@@ -81,20 +81,20 @@
 
 		uint16_t max;
 
-		if (auto value = ReadNext<uint16_t>(type, file)) max = *value;
+		if (TryReadNext<uint16_t>(type, file, &max));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 		for (unsigned int i = 0; i < count; i++)
 		{
-			uint8_t r, g, b;
+			uint16_t r, g, b;
 
-			if (auto value = ReadNext<uint16_t>(type, file)) r = (uint8_t)(255.0f * ((float)(*value) / (float)max));
+			if (TryReadNext<uint16_t>(type, file, &r)) r = (uint16_t)(255.0f * ((float)r / (float)max));
 			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-			if (auto value = ReadNext<uint16_t>(type, file)) g = (uint8_t)(255.0f * ((float)(*value) / (float)max));
+			if (TryReadNext<uint16_t>(type, file, &g)) g = (uint16_t)(255.0f * ((float)g / (float)max));
 			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-			if (auto value = ReadNext<uint16_t>(type, file)) b = (uint8_t)(255.0f * ((float)(*value) / (float)max));
+			if (TryReadNext<uint16_t>(type, file, &b)) b = (uint16_t)(255.0f * ((float)b / (float)max));
 			else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
 			pixels.emplace_back(r / 255.0f, g / 255.0f, b / 255.0f);

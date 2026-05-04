@@ -3,7 +3,6 @@
 #include <string>
 #include <fstream>
 #include <expected>
-#include <optional>
 
 #include "Image.h"
 
@@ -11,12 +10,10 @@ class NetPBM : public Image
 {
 private:
 	template<typename T>
-	static std::optional<T> ReadNext(char type, std::ifstream& file)
+	static bool TryReadNext(char type, std::ifstream& file, T* value)
 	{
 		if (file.eof())
-			return std::nullopt;
-
-		T value;
+			return false;
 
 		if ((type & 0b100) == 0)
 		{
@@ -29,16 +26,16 @@ private:
 			}
 
 			if (file.eof())
-				return std::nullopt;
+				return false;
 
-			file >> value;
+			file >> *value;
 		}
 		else
 		{
-			file.read((char*)(&value), sizeof(value));
+			file.read((char*)value, sizeof(T));
 		}
 
-		return value;
+		return true;
 	}
 
 public:
