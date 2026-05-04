@@ -181,6 +181,7 @@
 					[&position](const Token& x) { position++; return x.value; }
 				);
 
+				position--;
 				continue;
 			}
 		}
