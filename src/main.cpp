@@ -11,15 +11,15 @@
 
 #include "Shell.h"
 #include "Image.h"
-#include "Material.h"
+#include "Filter.h"
 #include "NetPBM.h"
 
-struct LoadedMaterial
+struct LoadedFilter
 {
-	Material material;
+	std::unique_ptr<Filter> filter;
 	std::optional<std::string> alias;
 
-	LoadedMaterial(const Material& material, const std::optional<std::string>& alias) : material(material), alias(alias) {}
+	LoadedFilter(std::unique_ptr<Filter>&& filter, const std::optional<std::string>& alias) : filter(std::move(filter)), alias(alias) {}
 };
 
 struct LoadedImage
@@ -27,7 +27,7 @@ struct LoadedImage
 	Image image;
 	std::string path;
 	std::optional<std::string> alias;
-	std::vector<LoadedMaterial> filters;
+	std::vector<LoadedFilter> filters;
 
 	LoadedImage(Image&& image, const std::string& path, const std::optional<std::string>& alias) : image(std::move(image)), path(path), alias(alias) {}
 };
@@ -140,24 +140,6 @@ static bool TryParse(const char* str, Color* result)
 	return true;
 }
 
-static const Material* GetMaterialByName(const std::string&	name)
-{
-	if (!strcmp(name.c_str(), "Threshold")) return &Material::Threshold;
-	if (!strcmp(name.c_str(), "Inverse")) return &Material::Inverse;
-	if (!strcmp(name.c_str(), "Grayscale")) return &Material::Grayscale;
-	if (!strcmp(name.c_str(), "ContrastStretch")) return &Material::ContrastStretch;
-	if (!strcmp(name.c_str(), "Blur")) return &Material::Blur;
-	if (!strcmp(name.c_str(), "Sharpen")) return &Material::Sharpen;
-	if (!strcmp(name.c_str(), "Emboss")) return &Material::Emboss;
-	if (!strcmp(name.c_str(), "Outline")) return &Material::Outline;
-	if (!strcmp(name.c_str(), "TopSobel")) return &Material::TopSobel;
-	if (!strcmp(name.c_str(), "BottomSobel")) return &Material::BottomSobel;
-	if (!strcmp(name.c_str(), "LeftSobel")) return &Material::LeftSobel;
-	if (!strcmp(name.c_str(), "RightSobel")) return &Material::RightSobel;
-
-	return nullptr;
-}
-
 static int Help(const ProgramArguments& args)
 {
 	std::println("help - prints commands usage");
@@ -165,7 +147,7 @@ static int Help(const ProgramArguments& args)
 	std::println("cd [dir] - changes the working directory");
 	std::println("ls [dir] - list directory contents");
 	std::println("load <path> [as <alias>] - loads an image file with an optional name/alias");
-	std::println("add-filter <image> <filter> [as <alias>] [property=value ...] - adds a filter with an optional name/alias to be applied to the image");
+	std::println("add-filter <image> <filter> [as <alias>] [filter-specific-args ...] - adds a filter with an optional name/alias to be applied to the image");
 	std::println("remove-filter <image> {{<filter>|<filter-index>}} - removes the specified filter from an image");
 	std::println("show-filters <image> - shows all filters that will be applied to the image");
 	std::println("show-all-filters - shows all loaded images with all of their filters");
@@ -224,7 +206,7 @@ static int Load(const ProgramArguments& args)
 
 static int AddFilter(const ProgramArguments& args)
 {
-	// add-filter <image> <filter> [as <alias>] [property=value ...]
+	// add-filter <image> <filter> [as <alias>] [filter-specific-args ...]
 
 	if (args.size() < 2)
 	{
@@ -236,13 +218,6 @@ static int AddFilter(const ProgramArguments& args)
 	if (loadedImage == loadedImages.end())
 	{
 		std::println(stderr, "Cannot find the loaded image '{}'.", args[0]);
-		return 2;
-	}
-
-	auto filter = GetMaterialByName(args[1]);
-	if (!filter)
-	{
-		std::println(stderr, "Cannot find filter '{}'.", args[1]);
 		return 2;
 	}
 
@@ -258,34 +233,33 @@ static int AddFilter(const ProgramArguments& args)
 		alias = args[3];
 	}
 
-	loadedImage->filters.emplace_back(*filter, alias);
+	std::vector<std::any> arguments;
 
 	for (size_t i = alias ? 4 : 2; i < args.size(); i++)
 	{
-		auto delim = std::find(args[i].begin(), args[i].end(), '=');
-
-		if (delim == args[i].end())
-		{
-			std::println(stderr, "Filter property '{}' must be in the 'name=value' format.", args[i]);
-			return 1;
-		}
-
-		std::string name(args[i].begin(), delim);
-		std::string value(delim + 1, args[i].end());
-
 		int _int;
 		float _float;
 		Color _Color;
 
-		if (TryParse(value.c_str(), &_int)) loadedImage->filters.back().material.GetUniforms().Set<int>(name, _int);
-		else if (TryParse(value.c_str(), &_float)) loadedImage->filters.back().material.GetUniforms().Set<float>(name, _float);
-		else if (TryParse(value.c_str(), &_Color)) loadedImage->filters.back().material.GetUniforms().Set<Color>(name, _Color);
+		if (TryParse(args[i].c_str(), &_int)) arguments.push_back(_int);
+		else if (TryParse(args[i].c_str(), &_float)) arguments.push_back(_float);
+		else if (TryParse(args[i].c_str(), &_Color)) arguments.push_back(_Color);
 		else
 		{
-			std::println(stderr, "Cannot parse value '{}' of property '{}'.", value, name);
+			std::println(stderr, "Cannot parse argument '{}'.", args[i]);
 			return 2;
 		}
 	}
+
+	auto filter = Filter::Parse(args[1], arguments);
+	if (!filter)
+	{
+		std::println(stderr, "Failed to load filter.", args[1]);
+		std::println(stderr, "{}", filter.error());
+		return 2;
+	}
+
+	loadedImage->filters.emplace_back(std::move(filter.value()), alias);
 
 	return 0;
 }
@@ -307,7 +281,7 @@ static int RemoveFilter(const ProgramArguments& args)
 		return 2;
 	}
 
-	auto filter = std::find_if(loadedImage->filters.begin(), loadedImage->filters.end(), [&args](const LoadedMaterial& x) { return x.alias == args[1] || x.material.GetName() == args[1]; });
+	auto filter = std::find_if(loadedImage->filters.begin(), loadedImage->filters.end(), [&args](const LoadedFilter& x) { return x.alias == args[1] || x.filter->GetName() == args[1]; });
 	if (filter == loadedImage->filters.end())
 	{
 		int index;
@@ -351,18 +325,8 @@ static int ShowFilters(const ProgramArguments& args)
 
 	for (size_t i = 0; i < loadedImage->filters.size(); i++)
 	{
-		std::print("[{}]: '{}'", i, loadedImage->filters[i].material.GetName());
+		std::print("[{}]: '{}'", i, loadedImage->filters[i].filter->GetName());
 		if (loadedImage->filters[i].alias) std::print(" (as '{}')", loadedImage->filters[i].alias.value());
-
-		for (const auto& property : loadedImage->filters[i].material.GetUniforms())
-		{
-			if (property.second.type() == typeid(int))
-				std::print(" {}={}", property.first, std::any_cast<int>(property.second));
-			else if (property.second.type() == typeid(float))
-				std::print(" {}={}", property.first, std::any_cast<float>(property.second));
-			else if (property.second.type() == typeid(Color))
-				std::print(" {}=#{:08x}", property.first, (uint32_t)std::any_cast<Color>(property.second));
-		}
 
 		std::println();
 	}
@@ -402,9 +366,6 @@ static int Run(const ProgramArguments& args)
 		return 2;
 	}
 
-	Image source(0, 0);
-	Image destination = loadedImage->image;
-
 	std::print("Running filters for image '{}'", loadedImage->path);
 	if (loadedImage->alias) std::print(" (as '{}')", loadedImage->alias.value());
 	std::println(":");
@@ -412,17 +373,15 @@ static int Run(const ProgramArguments& args)
 	for (size_t i = 0; i < loadedImage->filters.size(); i++)
 	{
 		std::print("Filter: ");
-		std::print("[{}]: '{}'", i, loadedImage->filters[i].material.GetName());
+		std::print("[{}]: '{}'", i, loadedImage->filters[i].filter->GetName());
 		if (loadedImage->filters[i].alias) std::print(" (as '{}')", loadedImage->filters[i].alias.value());
 		std::println();
 
-		source = destination;
-		source.ApplyMaterial(loadedImage->filters[i].material, destination);
+		for (const auto& filter : loadedImage->filters)
+			filter.filter->Apply(loadedImage->image);
 
 		std::println("Done");
 	}
-
-	loadedImage->image = std::move(destination);
 
 	return 0;
  }
