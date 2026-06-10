@@ -12,4 +12,6 @@ public:
 	virtual void Apply(Image& image) const override;
 
 	ImageKernel(const float matrix[9]);
+
+	virtual ~ImageKernel() = default;
 };
