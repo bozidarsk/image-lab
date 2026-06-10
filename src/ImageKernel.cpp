@@ -31,7 +31,9 @@ void ImageKernel::Apply(Image& image) const
 			color += matrix[7] * image[x, y + 1];
 			color += matrix[8] * image[x + 1, y + 1];
 
-			image[x, y] = color;
+			image[x, y].r = color.r;
+			image[x, y].g = color.g;
+			image[x, y].b = color.b;
 		}
 	}
 }
