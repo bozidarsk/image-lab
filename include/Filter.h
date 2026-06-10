@@ -16,5 +16,12 @@ public:
 	virtual const std::string& GetName() const = 0;
 	virtual void Apply(Image& image) const = 0;
 
+protected:
+	Filter& operator = (const Filter&) = delete;
+	Filter(const Filter&) = delete;
+
+public:
+	Filter() = default;
+
 	virtual ~Filter() = default;
 };
