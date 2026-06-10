@@ -15,7 +15,7 @@
 #include "Sharpen.h"
 #include "TopSobel.h"
 
-/* static */ std::expected<std::unique_ptr<Filter>, std::string> Filter::Parse(const std::string name, const std::vector<std::any>& arguments)
+/* static */ std::expected<std::unique_ptr<Filter>, std::string> Filter::Parse(const std::string& name, const std::vector<std::any>& arguments)
 {
 	if (!strcmp(name.c_str(), "Threshold"))
 	{
