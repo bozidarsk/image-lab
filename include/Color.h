@@ -2,6 +2,7 @@
 
 #include <string>
 #include <compare>
+#include <expected>
 #include <cstdint>
 
 struct Color
@@ -19,7 +20,7 @@ struct Color
 	static const Color Cyan;
 	static const Color Magenta;
 
-	static Color Parse(const std::string& str);
+	static std::expected<Color, std::string> Parse(const std::string& str);
 	static bool TryParse(const std::string& str, Color* result);
 
 	void Clamp();

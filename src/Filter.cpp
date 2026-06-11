@@ -15,6 +15,19 @@
 #include "Sharpen.h"
 #include "TopSobel.h"
 
+/* static */ bool Filter::TryParse(const std::string& name, const std::vector<std::any>& arguments, std::unique_ptr<Filter>* result)
+{
+	if (auto filter = Parse(name, arguments))
+	{
+		if (result)
+			*result = std::move(filter.value());
+
+		return true;
+	}
+
+	return false;
+}
+
 /* static */ std::expected<std::unique_ptr<Filter>, std::string> Filter::Parse(const std::string& name, const std::vector<std::any>& arguments)
 {
 	if (!strcmp(name.c_str(), "Threshold"))

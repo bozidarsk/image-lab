@@ -134,15 +134,16 @@ int Application::AddFilter(const ProgramArguments& args)
 		return 2;
 	}
 
-	auto filter = Filter::Parse(args[1], arguments);
-	if (!filter)
+	if (auto filter = Filter::Parse(args[1], arguments))
+	{
+		loadedImage->filters.push_back({ .filter = std::move(filter.value()), .alias = alias });
+	}
+	else
 	{
 		std::println(stderr, "Failed to load filter.", args[1]);
 		std::println(stderr, "{}", filter.error());
 		return 2;
 	}
-
-	loadedImage->filters.push_back({ .filter = std::move(filter.value()), .alias = alias });
 
 	return 0;
 }

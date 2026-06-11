@@ -1,4 +1,3 @@
-#include <stdexcept>
 #include <algorithm>
 
 #include "Color.h"
@@ -14,20 +13,10 @@
 /*static*/ const Color Color::Cyan        = Color(0xffffff00);
 /*static*/ const Color Color::Magenta     = Color(0xffff00ff);
 
-/*static*/ Color Color::Parse(const std::string& str)
+/*static*/ std::expected<Color, std::string> Color::Parse(const std::string& str)
 {
-	Color result;
-
-	if (!TryParse(str, &result))
-		throw std::invalid_argument("Input string is in invalid format.");
-
-	return result;
-}
-
-/*static*/ bool Color::TryParse(const std::string& str, Color* result)
-{
-	if (!str[0])
-		return false;
+	if (str.empty())
+		return std::unexpected("Invalid format.");
 
 	int start = 0;
 
@@ -45,17 +34,29 @@
 		if (str[i] >= '0' && str[i] <= '9') color |= str[i] - '0';
 		else if (str[i] >= 'a' && str[i] <= 'f') color |= (str[i] - 'a') + 0xa;
 		else if (str[i] >= 'A' && str[i] <= 'F') color |= (str[i] - 'A') + 0xa;
-		else return false;
+		else return std::unexpected("Invalid format.");
 	}
 
 	if (length != 6 && length != 8)
-		return false;
+		return std::unexpected("Invalid format.");
 
 	if (length == 6)
 		color |= 0xff000000;
 
-	*result = Color(color);
-	return true;
+	return Color(color);
+}
+
+/*static*/ bool Color::TryParse(const std::string& str, Color* result)
+{
+	if (auto color = Parse(str))
+	{
+		if (result)
+			*result = std::move(color.value());
+
+		return true;
+	}
+
+	return false;
 }
 
 void Color::Clamp()
