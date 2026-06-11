@@ -59,7 +59,7 @@
 	return false;
 }
 
-void Color::Clamp()
+void Color::Normalize()
 {
 	r = std::clamp(r, 0.0f, 1.0f);
 	g = std::clamp(g, 0.0f, 1.0f);

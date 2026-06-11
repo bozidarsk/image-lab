@@ -23,7 +23,7 @@ struct Color
 	static std::expected<Color, std::string> Parse(const std::string& str);
 	static bool TryParse(const std::string& str, Color* result);
 
-	void Clamp();
+	void Normalize();
 	float Luminance() const;
 
 	Color& operator *= (float x);
