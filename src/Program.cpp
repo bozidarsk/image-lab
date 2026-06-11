@@ -123,17 +123,7 @@ ProgramEntryPoint Program::GetEntryPoint() const { return entryPoint; }
 
 int Program::Run(const ProgramArguments& args) const { return entryPoint(args); }
 
-Program::Program(const char* name, ProgramEntryPoint entryPoint) : name(name), entryPoint(entryPoint)
-{
-	assert(entryPoint);
-}
-
-Program::Program(const std::string& name, ProgramEntryPoint entryPoint) : name(name), entryPoint(entryPoint)
-{
-	assert(entryPoint);
-}
-
-Program::Program(std::string&& name, ProgramEntryPoint entryPoint) : name(std::move(name)), entryPoint(entryPoint)
+Program::Program(const std::string& name, const ProgramEntryPoint& entryPoint) : name(name), entryPoint(entryPoint)
 {
 	assert(entryPoint);
 }

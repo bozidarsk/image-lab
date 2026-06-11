@@ -2,10 +2,10 @@
 
 #include <span>
 #include <string>
+#include <functional>
 
 using ProgramArguments = std::span<std::string>;
-
-typedef int(*ProgramEntryPoint)(const ProgramArguments& args);
+using ProgramEntryPoint = std::function<int(const ProgramArguments&)>;
 
 class Program
 {
@@ -23,7 +23,5 @@ public:
 
 	int Run(const ProgramArguments& args) const;
 
-	Program(const char* name, ProgramEntryPoint entryPoint);
-	Program(const std::string& name, ProgramEntryPoint entryPoint);
-	Program(std::string&& name, ProgramEntryPoint entryPoint);
+	Program(const std::string& name, const ProgramEntryPoint& entryPoint);
 };
