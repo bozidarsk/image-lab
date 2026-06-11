@@ -75,11 +75,10 @@ Color& Color::operator += (const Color& x) { r += x.r; g += x.g; b += x.g; a += 
 Color& Color::operator -= (const Color& x) { r -= x.r; g -= x.g; b -= x.g; a -= x.a; return *this; }
 Color Color::operator + (const Color& x) const { return Color(r + x.r, g + x.g, b + x.g, a + x.a); }
 Color Color::operator - (const Color& x) const { return Color(r - x.r, g - x.g, b - x.g, a - x.a); }
+Color Color::operator / (float x) const { return Color(r / x, g / x, b / x, a / x); }
 
 Color operator * (const Color& color, float x) { return Color(color.r * x, color.g * x, color.b * x, color.a * x); }
 Color operator * (float x, const Color& color) { return Color(color.r * x, color.g * x, color.b * x, color.a * x); }
-Color operator / (const Color& color, float x) { return Color(color.r / x, color.g / x, color.b / x, color.a / x); }
-Color operator / (float x, const Color& color) { return Color(color.r / x, color.g / x, color.b / x, color.a / x); }
 
 Color::operator uint32_t () const { return (((uint32_t)(a * 255.0f) & 0xff) << 24) | (((uint32_t)(b * 255.0f) & 0xff) << 16) | (((uint32_t)(g * 255.0f) & 0xff) << 8) | (((uint32_t)(r * 255.0f) & 0xff) << 0); }
 

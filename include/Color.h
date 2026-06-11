@@ -32,6 +32,7 @@ struct Color
 	Color& operator -= (const Color& x);
 	Color operator + (const Color& x) const;
 	Color operator - (const Color& x) const;
+	Color operator / (float x) const;
 
 	explicit operator uint32_t () const;
 
@@ -45,5 +46,3 @@ struct Color
 
 Color operator * (const Color& color, float x);
 Color operator * (float x, const Color& color);
-Color operator / (const Color& color, float x);
-Color operator / (float x, const Color& color);
