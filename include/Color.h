@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <compare>
 #include <cstdint>
 
@@ -17,6 +18,9 @@ struct Color
 	static const Color Yellow;
 	static const Color Cyan;
 	static const Color Magenta;
+
+	static Color Parse(const std::string& str);
+	static bool TryParse(const std::string& str, Color* result);
 
 	void Clamp();
 	float Luminance() const;

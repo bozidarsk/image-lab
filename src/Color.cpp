@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <algorithm>
 
 #include "Color.h"
@@ -12,6 +13,50 @@
 /*static*/ const Color Color::Yellow      = Color(0xff00ffff);
 /*static*/ const Color Color::Cyan        = Color(0xffffff00);
 /*static*/ const Color Color::Magenta     = Color(0xffff00ff);
+
+/*static*/ Color Color::Parse(const std::string& str)
+{
+	Color result;
+
+	if (!TryParse(str, &result))
+		throw std::invalid_argument("Input string is in invalid format.");
+
+	return result;
+}
+
+/*static*/ bool Color::TryParse(const std::string& str, Color* result)
+{
+	if (!str[0])
+		return false;
+
+	int start = 0;
+
+	if (str[0] == '#') start++;
+	if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) start += 2;
+
+	uint32_t color = 0;
+	int length = 0;
+
+	for (int i = start; str[i]; i++)
+	{
+		color <<= 4;
+		length++;
+
+		if (str[i] >= '0' && str[i] <= '9') color |= str[i] - '0';
+		else if (str[i] >= 'a' && str[i] <= 'f') color |= (str[i] - 'a') + 0xa;
+		else if (str[i] >= 'A' && str[i] <= 'F') color |= (str[i] - 'A') + 0xa;
+		else return false;
+	}
+
+	if (length != 6 && length != 8)
+		return false;
+
+	if (length == 6)
+		color |= 0xff000000;
+
+	*result = Color(color);
+	return true;
+}
 
 void Color::Clamp()
 {
