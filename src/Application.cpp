@@ -1,7 +1,7 @@
-#include <cstdio>
 #include <print>
 #include <string>
 #include <iostream>
+#include <filesystem>
 
 #include "Shell.h"
 #include "NetPBM.h"
@@ -48,6 +48,8 @@ int Application::Load(const ProgramArguments& args)
 	}
 	else if (args.size() == 1)
 	{
+		args[0] = std::filesystem::absolute(args[0]);
+
 		auto image = NetPBM::Load(args[0]);
 		if (!image)
 		{
@@ -57,10 +59,18 @@ int Application::Load(const ProgramArguments& args)
 			return 2;
 		}
 
+		if (FindImage(args[0]) != loadedImages.end())
+		{
+			std::println(stderr, "Image with the same path '{}' already exists. (give it an alias)", args[0]);
+			return 2;
+		}
+
 		loadedImages.push_back({ .image = std::move(image.value()), .path = args[0] });
 	}
 	else if (args.size() == 3)
 	{
+		args[0] = std::filesystem::absolute(args[0]);
+
 		if (args[1] != "as")
 		{
 			std::println(stderr, "Invalid arguments.");
@@ -73,6 +83,12 @@ int Application::Load(const ProgramArguments& args)
 			std::println(stderr, "Failed to load image.");
 			std::println(stderr, "{}", image.error());
 
+			return 2;
+		}
+
+		if (FindImage(args[2]) != loadedImages.end())
+		{
+			std::println(stderr, "Image with the same alias '{}' already exists.", args[2]);
 			return 2;
 		}
 
@@ -147,11 +163,17 @@ int Application::AddFilter(const ProgramArguments& args)
 
 	if (auto filter = Filter::Parse(args[1], arguments))
 	{
+		if (alias && loadedImage->FindFilter(alias.value()) != loadedImage->filters.end())
+		{
+			std::println(stderr, "Filter with the same alias '{}' already exists.", alias.value());
+			return 2;
+		}
+
 		loadedImage->filters.push_back({ .filter = std::move(filter.value()), .alias = alias });
 	}
 	else
 	{
-		std::println(stderr, "Failed to load filter.", args[1]);
+		std::println(stderr, "Failed to load filter.");
 		std::println(stderr, "{}", filter.error());
 		return 2;
 	}
