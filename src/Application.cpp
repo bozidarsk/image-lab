@@ -1,4 +1,5 @@
 #include <print>
+#include <array>
 #include <string>
 #include <iostream>
 #include <filesystem>
@@ -48,7 +49,7 @@ int Application::Load(const ProgramArguments& args)
 	}
 	else if (args.size() == 1)
 	{
-		args[0] = std::filesystem::absolute(args[0]);
+		args[0] = std::filesystem::absolute(args[0]).string();
 
 		auto image = NetPBM::Load(args[0]);
 		if (!image)
@@ -69,7 +70,7 @@ int Application::Load(const ProgramArguments& args)
 	}
 	else if (args.size() == 3)
 	{
-		args[0] = std::filesystem::absolute(args[0]);
+		args[0] = std::filesystem::absolute(args[0]).string();
 
 		if (args[1] != "as")
 		{
