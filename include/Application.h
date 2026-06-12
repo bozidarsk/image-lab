@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <optional>
 
 #include "Image.h"
@@ -21,10 +22,14 @@ private:
 		std::string path;
 		std::vector<LoadedFilter> filters;
 		std::optional<std::string> alias = std::nullopt;
+
+		auto FindFilter(const std::string& id);
 	};
 
 	std::vector<LoadedImage> loadedImages;
 	bool isRunning = false;
+
+	auto FindImage(const std::string& id);
 
 	int Help(const ProgramArguments& args);
 	int Load(const ProgramArguments& args);
