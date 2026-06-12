@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <print>
 #include <string>
 #include <iostream>
@@ -192,6 +193,12 @@ int Application::RemoveFilter(const ProgramArguments& args)
 
 		if (index < 0)
 			index = loadedImage->filters.size() + index;
+
+		if (index < 0 || index >= loadedImage->filters.size())
+		{
+			std::println(stderr, "Index is out of range.");
+			return 2;
+		}
 
 		loadedImage->filters.erase(loadedImage->filters.begin() + index);
 		return 0;
