@@ -5,9 +5,14 @@ layout(local_size_x = 1, local_size_y = 1) in;
 layout(std430, binding = 0) readonly buffer InputBuffer { vec4 inputColor[]; };
 layout(std430, binding = 1) writeonly buffer OutputBuffer { vec4 outputColor[]; };
 
+layout(push_constant) uniform PushConstants {
+    int width;
+    int height;
+};
+
 void main()
 {
-	uint index = gl_GlobalInvocationID.y * 533 + gl_GlobalInvocationID.x;
+	uint index = gl_GlobalInvocationID.y * width + gl_GlobalInvocationID.x;
 
 	outputColor[index].rgb = 1 - inputColor[index].rgb;
 	outputColor[index].a = inputColor[index].a;

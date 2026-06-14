@@ -318,11 +318,20 @@ void Vulkan::InitialzieDescriptorSet()
 
 void Vulkan::InitializePipelineLayout()
 {
+	VkPushConstantRange pushConstantsRange =
+	{
+		.stageFlags = VK_SHADER_STAGE_ALL,
+		.offset = 0,
+		.size = 128,
+	};
+
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo =
 	{
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 		.setLayoutCount = 1,
 		.pSetLayouts = &descriptorSetLayout,
+		.pushConstantRangeCount = 1,
+		.pPushConstantRanges = &pushConstantsRange,
 	};
 
 	vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, allocator, &pipelineLayout);

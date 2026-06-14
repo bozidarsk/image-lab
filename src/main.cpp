@@ -48,6 +48,9 @@ void runImages(const Vulkan& vk, const std::span<LoadedImage>& images)
 
 	for (auto& loadedImage : images)
 	{
+		int imageWidth = loadedImage.image.GetWidth();
+		int imageHeight = loadedImage.image.GetHeight();
+
 		for (const auto& loadedFilter : loadedImage.filters)
 		{
 			VkDescriptorBufferInfo bufferInfos[] =
@@ -93,8 +96,11 @@ void runImages(const Vulkan& vk, const std::span<LoadedImage>& images)
 			vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vk.pipelines[loadedFilter.index]);
 			vk.vkCmdPushDescriptorSetKHR(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vk.pipelineLayout, 0, 2, descriptorWrites);
 
+			vkCmdPushConstants(cmd, vk.pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof(int), &imageWidth);
+			vkCmdPushConstants(cmd, vk.pipelineLayout, VK_SHADER_STAGE_ALL, sizeof(int), sizeof(int), &imageHeight);
+
 			if (loadedFilter.parametersSize > 0)
-				vkCmdPushConstants(cmd, vk.pipelineLayout, VK_SHADER_STAGE_ALL, 0, loadedFilter.parametersSize, loadedFilter.parameters.get());
+				vkCmdPushConstants(cmd, vk.pipelineLayout, VK_SHADER_STAGE_ALL, sizeof(int) * 2, loadedFilter.parametersSize, loadedFilter.parameters.get());
 
 			vkCmdDispatch(cmd, loadedImage.image.GetWidth(), loadedImage.image.GetHeight(), 1);
 
