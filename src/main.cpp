@@ -1,7 +1,10 @@
-#include "Application.h"
+#include "Image.h"
+#include "Vulkan.h"
 
 int main(int argc, char** argv)
 {
-	Application app;
-	app.Run();
+	Vulkan vk;
+
+	Image image("test.png");
+	image.Save("test-out.png");
 }

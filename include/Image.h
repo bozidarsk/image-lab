@@ -10,12 +10,15 @@
 class Image
 {
 private:
-	unsigned int width, height;
+	int width, height;
 	std::vector<Color> pixels;
 
 public:
-	unsigned int GetWidth() const;
-	unsigned int GetHeight() const;
+	int GetWidth() const;
+	int GetHeight() const;
+
+	void Save(const char* path) const;
+	void Save(const std::string& path) const;
 
 	std::span<Color> GetPixels();
 	const std::span<const Color> GetPixels() const;
@@ -26,8 +29,10 @@ public:
 	Color& operator [] (int x, int y);
 	const Color& operator [] (int x, int y) const;
 
-	Image(unsigned int width, unsigned int height);
-	Image(unsigned int width, unsigned int height, const std::vector<Color>& pixels);
-	Image(unsigned int width, unsigned int height, std::vector<Color>&& pixels);
-	Image(unsigned int width, unsigned int height, std::initializer_list<Color> pixels);
+	explicit Image(const char* path);
+	explicit Image(const std::string& path);
+	Image(int width, int height);
+	Image(int width, int height, const std::vector<Color>& pixels);
+	Image(int width, int height, std::vector<Color>&& pixels);
+	Image(int width, int height, std::initializer_list<Color> pixels);
 };
