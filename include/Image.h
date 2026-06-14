@@ -10,7 +10,7 @@
 class Image
 {
 private:
-	unsigned int width, height;
+	int width, height;
 	std::vector<Color> pixels;
 
 protected:
@@ -20,8 +20,8 @@ protected:
 	Image(Image&&) = default;
 
 public:
-	unsigned int GetWidth() const;
-	unsigned int GetHeight() const;
+	int GetWidth() const;
+	int GetHeight() const;
 
 	std::span<Color> GetPixels();
 	const std::span<const Color> GetPixels() const;
@@ -32,10 +32,10 @@ public:
 	Color& operator [] (int x, int y);
 	const Color& operator [] (int x, int y) const;
 
-	Image(unsigned int width, unsigned int height);
-	Image(unsigned int width, unsigned int height, const std::vector<Color>& pixels);
-	Image(unsigned int width, unsigned int height, std::vector<Color>&& pixels);
-	Image(unsigned int width, unsigned int height, std::initializer_list<Color> pixels);
+	Image(int width, int height);
+	Image(int width, int height, const std::vector<Color>& pixels);
+	Image(int width, int height, std::vector<Color>&& pixels);
+	Image(int width, int height, std::initializer_list<Color> pixels);
 
 	virtual ~Image() = default;
 };

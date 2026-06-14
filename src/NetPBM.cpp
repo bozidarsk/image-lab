@@ -18,21 +18,21 @@
 
 	char type = magic[1];
 
-	unsigned int width, height;
+	int width, height;
 	std::vector<Color> pixels;
 
 	if (type == '1' || type == '4')
 	{
-		if (TryReadNext<unsigned int>(type, file, &width));
+		if (TryReadNext<int>(type, file, &width));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-		if (TryReadNext<unsigned int>(type, file, &height));
+		if (TryReadNext<int>(type, file, &height));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-		unsigned int count = width * height;
+		int count = width * height;
 		pixels.reserve(count);
 
-		for (unsigned int i = 0; i < count; i++)
+		for (int i = 0; i < count; i++)
 		{
 			char x;
 
@@ -44,13 +44,13 @@
 	}
 	else if (type == '2' || type == '5')
 	{
-		if (TryReadNext<unsigned int>(type, file, &width));
+		if (TryReadNext<int>(type, file, &width));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-		if (TryReadNext<unsigned int>(type, file, &height));
+		if (TryReadNext<int>(type, file, &height));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-		unsigned int count = width * height;
+		int count = width * height;
 		pixels.reserve(count);
 
 		uint16_t max;
@@ -58,7 +58,7 @@
 		if (TryReadNext<uint16_t>(type, file, &max));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-		for (unsigned int i = 0; i < count; i++)
+		for (int i = 0; i < count; i++)
 		{
 			uint16_t x;
 
@@ -70,13 +70,13 @@
 	}
 	else if (type == '3' || type == '6')
 	{
-		if (TryReadNext<unsigned int>(type, file, &width));
+		if (TryReadNext<int>(type, file, &width));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-		if (TryReadNext<unsigned int>(type, file, &height));
+		if (TryReadNext<int>(type, file, &height));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-		unsigned int count = width * height;
+		int count = width * height;
 		pixels.reserve(count);
 
 		uint16_t max;
@@ -84,7 +84,7 @@
 		if (TryReadNext<uint16_t>(type, file, &max));
 		else return std::unexpected(std::format("Error parsing file '{}' at {}.", path, (int64_t)file.tellg()));
 
-		for (unsigned int i = 0; i < count; i++)
+		for (int i = 0; i < count; i++)
 		{
 			uint16_t r, g, b;
 
@@ -152,7 +152,7 @@
 	file.close();
 }
 
-NetPBM::NetPBM(unsigned int width, unsigned int height) : Image(width, height) {}
-NetPBM::NetPBM(unsigned int width, unsigned int height, const std::vector<Color>& pixels) : Image(width, height, pixels) {}
-NetPBM::NetPBM(unsigned int width, unsigned int height, std::vector<Color>&& pixels) : Image(width, height, std::move(pixels)) {}
-NetPBM::NetPBM(unsigned int width, unsigned int height, std::initializer_list<Color> pixels) : Image(width, height, pixels) {}
+NetPBM::NetPBM(int width, int height) : Image(width, height) {}
+NetPBM::NetPBM(int width, int height, const std::vector<Color>& pixels) : Image(width, height, pixels) {}
+NetPBM::NetPBM(int width, int height, std::vector<Color>&& pixels) : Image(width, height, std::move(pixels)) {}
+NetPBM::NetPBM(int width, int height, std::initializer_list<Color> pixels) : Image(width, height, pixels) {}
