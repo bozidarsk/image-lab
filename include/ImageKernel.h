@@ -12,8 +12,10 @@ public:
 	virtual void Apply(Image& image) const override;
 
 protected:
-	ImageKernel& operator = (const ImageKernel&) = delete;
-	ImageKernel(const ImageKernel&) = delete;
+	ImageKernel& operator = (const ImageKernel&) = default;
+	ImageKernel(const ImageKernel&) = default;
+	ImageKernel& operator = (ImageKernel&&) = default;
+	ImageKernel(ImageKernel&&) = default;
 
 public:
 	ImageKernel(const float matrix[9]);

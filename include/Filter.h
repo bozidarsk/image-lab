@@ -18,8 +18,10 @@ public:
 	virtual void Apply(Image& image) const = 0;
 
 protected:
-	Filter& operator = (const Filter&) = delete;
-	Filter(const Filter&) = delete;
+	Filter& operator = (const Filter&) = default;
+	Filter(const Filter&) = default;
+	Filter& operator = (Filter&&) = default;
+	Filter(Filter&&) = default;
 
 public:
 	Filter() = default;
