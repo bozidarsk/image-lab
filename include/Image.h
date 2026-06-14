@@ -2,6 +2,8 @@
 
 #include <span>
 #include <vector>
+#include <string>
+#include <expected>
 #include <initializer_list>
 #include <cassert>
 
@@ -28,6 +30,8 @@ public:
 
 	Color& operator [] (int x, int y);
 	const Color& operator [] (int x, int y) const;
+
+	static std::expected<Image, std::string> FromFile(const std::string& path);
 
 	explicit Image(const char* path);
 	explicit Image(const std::string& path);

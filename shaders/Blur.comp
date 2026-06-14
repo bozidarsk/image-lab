@@ -1,0 +1,46 @@
+#version 450
+
+layout(local_size_x = 1, local_size_y = 1) in;
+
+layout(std430, binding = 0) readonly buffer InputBuffer { vec4 inputColor[]; };
+layout(std430, binding = 1) writeonly buffer OutputBuffer { vec4 outputColor[]; };
+
+layout(push_constant) uniform PushConstants {
+    int width;
+    int height;
+};
+
+const float kernel[9] =
+{
+	0.0625, 0.1250, 0.0625,
+	0.1250, 0.2500, 0.1250,
+	0.0625, 0.1250, 0.0625,
+};
+
+const ivec2 offsets[9] =
+{
+	ivec2(-1, -1), ivec2( 0, -1), ivec2( 1, -1),
+	ivec2(-1,  0), ivec2( 0,  0), ivec2( 1,  0),
+	ivec2(-1,  1), ivec2( 0,  1), ivec2( 1,  1),
+};
+
+void main()
+{
+	uvec2 position = gl_GlobalInvocationID.xy;
+	uint index = position.y * width + position.x;
+
+	if (position.x == 0 || position.y == 0 || position.x == width - 1 || position.y == height - 1)
+		outputColor[index] = vec4(0, 0, 0, 1);
+
+	vec4 sum = vec4(0);
+
+	for (uint i = 0; i < 9; i++)
+	{
+		uint sampleOffset = (position.y + offsets[i].y) * width + (position.x + offsets[i].x);
+
+		sum += inputColor[sampleOffset] * kernel[i];
+	}
+
+	outputColor[index].rgb = sum.rgb;
+	outputColor[index].a = inputColor[index].a;
+}

@@ -64,6 +64,40 @@ const Color& Image::operator [] (int x, int y) const
 	return pixels[y * width + x];
 }
 
+/* static */ std::expected<Image, std::string> Image::FromFile(const std::string& path)
+{
+	if (!std::filesystem::exists(path))
+		return std::unexpected(std::format("File '{}' does not exist.", path));
+
+	if (!std::filesystem::is_regular_file(path))
+		return std::unexpected(std::format("File '{}' is not a file.", path));
+
+	int width, height;
+
+	const uint32_t* data = (const uint32_t*)stbi_load(path.c_str(), &width, &height, nullptr, 4);
+
+	if (!data)
+		return std::unexpected("Error parsing image.");
+
+	Image image(width, height);
+
+	int size = width * height;
+	image.pixels.resize(size);
+
+	for (int i = 0; i < size; i++)
+	{
+		Color& pixel = image.pixels[i];
+		pixel.r = (float)((data[i] >> 0) & 0xff) / 255.0f;
+		pixel.g = (float)((data[i] >> 8) & 0xff) / 255.0f;
+		pixel.b = (float)((data[i] >> 16) & 0xff) / 255.0f;
+		pixel.a = (float)((data[i] >> 24) & 0xff) / 255.0f;
+	}
+
+	stbi_image_free((void*)data);
+
+	return image;
+}
+
 Image::Image(const std::string& path) : Image(path.c_str()) {}
 Image::Image(const char* path)
 {
