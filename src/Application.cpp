@@ -66,7 +66,7 @@ int Application::Load(const ProgramArguments& args)
 			return 2;
 		}
 
-		loadedImages.push_back({ .image = std::move(image.value()), .path = args[0] });
+		loadedImages.push_back({ .image = std::make_unique<NetPBM>(std::move(image.value())), .path = args[0] });
 	}
 	else if (args.size() == 3)
 	{
@@ -93,7 +93,7 @@ int Application::Load(const ProgramArguments& args)
 			return 2;
 		}
 
-		loadedImages.push_back({ .image = std::move(image.value()), .path = args[0], .alias = args[2] });
+		loadedImages.push_back({ .image = std::make_unique<NetPBM>(std::move(image.value())), .path = args[0], .alias = args[2] });
 	}
 
 	return 0;
@@ -307,7 +307,7 @@ int Application::Run(const ProgramArguments& args)
 		std::println();
 
 		for (const auto& filter : loadedImage->filters)
-			filter.filter->Apply(loadedImage->image);
+			filter.filter->Apply(*loadedImage->image);
 
 		std::println("Done");
 	}
@@ -353,7 +353,7 @@ int Application::Save(const ProgramArguments& args)
 	if (loadedImage->alias) std::print(" (as '{}')", loadedImage->alias.value());
 	std::println(" to '{}'.", path);
 
-	NetPBM::Save(path, loadedImage->image);
+	NetPBM::Save(path, *loadedImage->image);
 	std::println("Done.");
 
 	return 0;

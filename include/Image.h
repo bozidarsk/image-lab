@@ -13,6 +13,12 @@ private:
 	unsigned int width, height;
 	std::vector<Color> pixels;
 
+protected:
+	Image& operator = (const Image&) = default;
+	Image(const Image&) = default;
+	Image& operator = (Image&&) = default;
+	Image(Image&&) = default;
+
 public:
 	unsigned int GetWidth() const;
 	unsigned int GetHeight() const;
@@ -30,4 +36,6 @@ public:
 	Image(unsigned int width, unsigned int height, const std::vector<Color>& pixels);
 	Image(unsigned int width, unsigned int height, std::vector<Color>&& pixels);
 	Image(unsigned int width, unsigned int height, std::initializer_list<Color> pixels);
+
+	virtual ~Image() = default;
 };

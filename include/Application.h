@@ -18,7 +18,7 @@ private:
 
 	struct LoadedImage
 	{
-		Image image;
+		std::unique_ptr<Image> image;
 		std::string path;
 		std::vector<LoadedFilter> filters;
 		std::optional<std::string> alias = std::nullopt;
