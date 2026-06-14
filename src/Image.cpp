@@ -38,7 +38,22 @@ const Color& Image::operator [] (int x, int y) const
 	return pixels[y * width + x];
 }
 
-Image::Image(unsigned int width, unsigned int height) : width(width), height(height) { pixels.resize(width * height); }
-Image::Image(unsigned int width, unsigned int height, const std::vector<Color>& pixels) : width(width), height(height), pixels(pixels) {}
-Image::Image(unsigned int width, unsigned int height, std::vector<Color>&& pixels) : width(width), height(height), pixels(std::move(pixels)) {}
-Image::Image(unsigned int width, unsigned int height, std::initializer_list<Color> pixels) : width(width), height(height), pixels(pixels) {}
+Image::Image(unsigned int width, unsigned int height) : width(width), height(height)
+{
+	pixels.resize(width * height);
+}
+
+Image::Image(unsigned int width, unsigned int height, const std::vector<Color>& pixels) : width(width), height(height), pixels(pixels)
+{
+	assert(pixels.size() == width * height);
+}
+
+Image::Image(unsigned int width, unsigned int height, std::vector<Color>&& pixels) : width(width), height(height), pixels(std::move(pixels))
+{
+	assert(pixels.size() == width * height);
+}
+
+Image::Image(unsigned int width, unsigned int height, std::initializer_list<Color> pixels) : width(width), height(height), pixels(pixels)
+{
+	assert(pixels.size() == width * height);
+}
