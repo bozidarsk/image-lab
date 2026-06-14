@@ -1,24 +1,33 @@
 #pragma once
 
-#include <cstdint>
+#include <string>
 #include <functional>
+#include <cstdint>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 class Vulkan
 {
-private:
+public:
 	VkAllocationCallbacks* allocator = nullptr;
 	VkDebugUtilsMessengerEXT debugUtilsMessenger;
 	VkInstance instance;
 	VkPhysicalDevice physicalDevice;
 	VkDevice device;
 	VkCommandPool commandPool;
+	VkCommandBuffer commandBuffer;
 	VkQueue computeQueue;
+	VkDescriptorSetLayout descriptorSetLayout;
+	VkDescriptorPool descriptorPool;
+	VkDescriptorSet descriptorSet;
+	VkPipelineLayout pipelineLayout;
+	std::vector<VkShaderModule> shaderModules;
+	std::vector<VkPipeline> pipelines;
 	uint32_t computeQueueFamilyIndex;
-	bool isRunning = false;
 
 	PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = nullptr;
 	PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = nullptr;
+	PFN_vkCmdPushDescriptorSetKHR vkCmdPushDescriptorSetKHR = nullptr;
 
 	std::function<void(VkDebugUtilsMessageSeverityFlagBitsEXT severity, VkDebugUtilsMessageTypeFlagBitsEXT type, const VkDebugUtilsMessengerCallbackDataEXT* data)> debugMessageCallback;
 
@@ -28,6 +37,7 @@ private:
 	static unsigned int OnDebugMessage(VkDebugUtilsMessageSeverityFlagBitsEXT severity, VkDebugUtilsMessageTypeFlagsEXT type, const VkDebugUtilsMessengerCallbackDataEXT* data, void* userData);
 
 	uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
+	VkShaderModule CreateShaderModule(const std::string& path) const;
 
 	void Initialize();
 	void InitializeInstance();
@@ -36,36 +46,29 @@ private:
 	void InitializePhysicalDevice();
 	void InitializeDevice();
 	void InitializeCommandPool();
+	void InitializeCommandBuffer();
+	void InitializeShaderModules();
+	void InitializeDescriptorSetLayout();
+	void InitializeDescriptorPool();
+	void InitialzieDescriptorSet();
+	void InitializePipelineLayout();
+	void InitializePipelines();
 
 public:
 	void SetDebugMessageCallback(const decltype(debugMessageCallback)& callback);
 
+	void CreateStorageBuffer(const void* data, VkDeviceSize size, VkBuffer* buffer, VkDeviceMemory* memory) const;
 	void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkBuffer* buffer) const;
 	void CreateBufferMemory(VkBuffer buffer, VkMemoryPropertyFlags properties, VkDeviceMemory* memory) const;
-	void CreateImage(int width, int height, VkImageType type, VkImageUsageFlags usage, VkFormat format, VkImage* image) const;
-	void CreateImageMemory(VkImage image, VkDeviceMemory* memory) const;
 	void CopyBuffer(VkBuffer source, VkBuffer destination, VkDeviceSize size, VkCommandBuffer cmd = nullptr) const;
-	void CopyBufferToImage(VkBuffer buffer, VkImage image, int width, int height, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT, VkCommandBuffer cmd = nullptr) const;
-	void CopyImageToBuffer(VkImage image, VkBuffer buffer, int width, int height, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT, VkCommandBuffer cmd = nullptr) const;
-	void CreateTexture(void* data, int width, int height, VkImageType type, VkFormat format, VkImage* image, VkImageView* imageView, VkDeviceMemory* memory, VkSampler* sampler) const;
-	void CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspect, VkImageView* imageView) const;
-	void CreateSampler(VkSampler* sampler) const;
-	void TransitionImageLayout(
-		VkImage image,
-
-		VkImageLayout from,
-		VkAccessFlags sourceAccess,
-		VkPipelineStageFlags sourceStage,
-
-		VkImageLayout to,
-		VkAccessFlags destinationAccess,
-		VkPipelineStageFlags destinationStage,
-
-		VkCommandBuffer cmd = nullptr
-	) const;
-	void TransitionImageLayout(VkImage image, VkImageLayout from, VkImageLayout to, VkCommandBuffer cmd = nullptr) const;
 	VkCommandBuffer BeginSingleTimeCommand() const;
 	void EndSingleTimeCommand(VkCommandBuffer cmd) const;
+
+	inline void* Map(VkDeviceMemory memory, VkDeviceSize size) const { void* data; vkMapMemory(device, memory, 0, size, 0, &data); return data; }
+	inline void Unmap(VkDeviceMemory memory) const { vkUnmapMemory(device, memory); }
+	inline void Destroy(VkBuffer object) const { vkDestroyBuffer(device, object, allocator); }
+	inline void Destroy(VkDeviceMemory object) const { vkFreeMemory(device, object, allocator); }
+	inline void Destroy(VkCommandBuffer object) const { vkFreeCommandBuffers(device, commandPool, 1, &object); }
 
 	Vulkan& operator = (const Vulkan&) = delete;
 	Vulkan& operator = (Vulkan&&) = delete;
